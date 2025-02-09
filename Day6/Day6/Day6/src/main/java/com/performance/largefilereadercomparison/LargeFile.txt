@@ -1,0 +1,4745 @@
+ Problem Statement: Large File Reading Efficiency
+                 Objective:
+                 Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+                 Approach:
+                 FileReader: Reads character by character (slower for binary files).
+                 InputStreamReader: Reads bytes and converts to characters (more efficient).
+                 Comparative Analysis:
+                 File Size
+                 FileReader Time
+                 InputStreamReader Time
+                 1MB
+                 50ms
+                 30ms
+                 100MB
+                 3s
+                 1.5s
+                 500MB
+                 10s
+                 5s
+
+                 Expected Result:
+                 InputStreamReader is more efficient for large files.
+                 FileReader is preferable for text-based data.
+Best Practices for Runtime Analysis & Big O Notation
+When designing algorithms, follow these best practices to ensure optimal time and space complexity.
+🟢 General Algorithm Best Practices
+Choose the right data structure
+Use HashMap for O(1) lookups instead of ArrayList (O(N)).
+Use TreeSet for ordered data retrieval with O(log N) complexity.
+Optimize loops & conditions
+Avoid unnecessary nested loops (O(N²) or worse).
+Use break/return early to reduce iterations.
+Use sorting efficiently
+Prefer Merge Sort (O(N log N)) over Bubble Sort (O(N²)).
+If frequent sorting is needed, consider TreeMap (O(log N) per operation).
+Avoid excessive recursion
+Recursive Fibonacci (O(2ⁿ)) is inefficient; use Memoization (O(N)).
+Use Tail Recursion when applicable.
+Reduce redundant computations
+Store results of expensive operations using caching/memoization.
+Example: Use Dynamic Programming to avoid recomputation.
+🔵 Time & Space Complexity Optimization
+Precompute values when possible
+If computing the same value multiple times, store it in a lookup table.
+Use efficient searching methods
+Instead of Linear Search (O(N)), use Binary Search (O(log N)) for sorted data.
+Use efficient iteration techniques
+Instead of for (int i = 0; i < list.size(); i++), use for-each loops.
+Example: for (String s : list)
+Optimize memory usage
+Use StringBuilder instead of String for concatenation.
+Use primitive types (int, double) over wrapper classes (Integer, Double) when possible.
+Profile & benchmark performance
+Use Java’s System.nanoTime() or JMH (Java Microbenchmark Harness) to measure execution time.
+
+1. Problem Statement: Search a Target in a Large Dataset
+Objective:
+Compare the performance of Linear Search (O(N)) and Binary Search (O(log N)) on different dataset sizes.
+Approach:
+Linear Search: Scan each element until the target is found.
+Binary Search: Sort the data first (O(N log N)), then perform O(log N) search.
+Comparative Analysis:
+Dataset Size (N)
+Linear Search (O(N))
+Binary Search (O(log N))
+1,000
+1ms
+0.01ms
+10,000
+10ms
+0.02ms
+1,000,000
+1s
+0.1ms
+
+Expected Result:
+Binary Search performs much better for large datasets, provided data is sorted.
+package com.performance.searchtarget;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SearchTarget {
+
+   // Linear Search Implementation
+   public static int linearSearch(int[] arr, int target) {
+       for (int i = 0; i < arr.length; i++) {
+           if (arr[i] == target) {
+               return i; // Return index if found
+           }
+       }
+       return -1; // Return -1 if not found
+   }
+
+   // Binary Search Implementation
+   public static int binarySearch(int[] arr, int target) {
+       int left = 0, right = arr.length - 1;
+       while (left <= right) {
+           int mid = left + (right - left) / 2;
+           if (arr[mid] == target)
+               return mid;
+           if (arr[mid] < target)
+               left = mid + 1;
+           else
+               right = mid - 1;
+       }
+       return -1;
+   }
+
+   public static void runSearchTest(int N) {
+       int[] dataset = new int[N];
+       Random random = new Random();
+
+       // Fill the dataset with random numbers
+       for (int i = 0; i < N; i++) {
+           dataset[i] = random.nextInt(N);
+       }
+
+       int target = dataset[random.nextInt(N)]; // Random target from dataset
+
+       // Measure Linear Search time
+       long startTime = System.nanoTime();
+       int linearResult = linearSearch(dataset, target);
+       long endTime = System.nanoTime();
+       double linearTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Sort the array for Binary Search
+       Arrays.sort(dataset);
+
+       // Measure Binary Search time
+       startTime = System.nanoTime();
+       int binaryResult = binarySearch(dataset, target);
+       endTime = System.nanoTime();
+       double binaryTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Print results
+       System.out.println("Dataset Size: " + N);
+       System.out.println("Linear Search Time: " + linearTime + " ms");
+       System.out.println("Binary Search Time: " + binaryTime + " ms");
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] datasetSizes = {1000, 10000, 1000000};
+
+       for (int N : datasetSizes) {
+           runSearchTest(N);
+       }
+   }
+}
+
+
+package com.performancetest.searchtargettest;
+
+import com.performance.searchtarget.SearchTarget;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class SearchTargetTest {
+
+   @Test
+   void testLinearSearch_Found() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(2, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_NotFound() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 7));
+   }
+
+   @Test
+   void testBinarySearch_Found() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(3, SearchTarget.binarySearch(arr, 8));
+   }
+
+   @Test
+   void testBinarySearch_NotFound() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 2));
+   }
+
+   @Test
+   void testBinarySearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementFound() {
+       int[] arr = {10};
+       assertEquals(0, SearchTarget.binarySearch(arr, 10));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementNotFound() {
+       int[] arr = {10};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       Arrays.sort(arr);
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.binarySearch(arr, target) >= 0);
+   }
+
+   @Test
+   void testLinearSearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.linearSearch(arr, target) >= 0);
+   }
+}
+
+
+
+
+
+2. Problem Statement: Sorting Large Data Efficiently
+Objective:
+Compare sorting algorithms Bubble Sort (O(N²)), Merge Sort (O(N log N)), and Quick Sort (O(N log N)).
+Approach:
+Bubble Sort: Repeated swapping (inefficient for large data).
+Merge Sort: Divide & Conquer approach (stable).
+Quick Sort: Partition-based approach (fast but unstable).
+Comparative Analysis:
+Dataset Size (N)
+Bubble Sort (O(N²))
+Merge Sort (O(N log N))
+Quick Sort (O(N log N))
+1,000
+50ms
+5ms
+3ms
+10,000
+5s
+50ms
+30ms
+1,000,000
+Unfeasible (>1hr)
+3s
+2s
+
+Expected Result:
+Bubble Sort is impractical for large datasets.
+Merge Sort & Quick Sort perform well.
+package com.performance.sortingcomparison;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1000, 10000, 1000000};
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+           int[] data = generateRandomArray(size);
+
+           // Measure Bubble Sort (Skipped for large N due to inefficiency)
+           if (size <= 10000) {
+               int[] bubbleData = Arrays.copyOf(data, data.length);
+               long start = System.currentTimeMillis();
+               bubbleSort(bubbleData);
+               long end = System.currentTimeMillis();
+               System.out.println("Bubble Sort: " + (end - start) + " ms");
+           } else {
+               System.out.println("Bubble Sort: Unfeasible");
+           }
+
+           // Measure Merge Sort
+           int[] mergeData = Arrays.copyOf(data, data.length);
+           long start = System.currentTimeMillis();
+           mergeSort(mergeData);
+           long end = System.currentTimeMillis();
+           System.out.println("Merge Sort: " + (end - start) + " ms");
+
+           // Measure Quick Sort
+           int[] quickData = Arrays.copyOf(data, data.length);
+           start = System.currentTimeMillis();
+           quickSort(quickData, 0, quickData.length - 1);
+           end = System.currentTimeMillis();
+           System.out.println("Quick Sort: " + (end - start) + " ms");
+
+           System.out.println("--------------------------");
+       }
+   }
+
+   public static int[] generateRandomArray(int size) {
+       Random random = new Random();
+       int[] array = new int[size];
+       for (int i = 0; i < size; i++) {
+           array[i] = random.nextInt(1000000); // Random numbers up to 1 million
+       }
+       return array;
+   }
+
+   public static void bubbleSort(int[] arr) {
+       int n = arr.length;
+       for (int i = 0; i < n - 1; i++) {
+           for (int j = 0; j < n - i - 1; j++) {
+               if (arr[j] > arr[j + 1]) {
+                   int temp = arr[j];
+                   arr[j] = arr[j + 1];
+                   arr[j + 1] = temp;
+               }
+           }
+       }
+   }
+
+   public static void mergeSort(int[] arr) {
+       if (arr.length < 2) return;
+       int mid = arr.length / 2;
+       int[] left = Arrays.copyOfRange(arr, 0, mid);
+       int[] right = Arrays.copyOfRange(arr, mid, arr.length);
+
+       mergeSort(left);
+       mergeSort(right);
+       merge(arr, left, right);
+   }
+
+   public static void merge(int[] arr, int[] left, int[] right) {
+       int i = 0, j = 0, k = 0;
+       while (i < left.length && j < right.length) {
+           if (left[i] <= right[j]) {
+               arr[k++] = left[i++];
+           } else {
+               arr[k++] = right[j++];
+           }
+       }
+       while (i < left.length) arr[k++] = left[i++];
+       while (j < right.length) arr[k++] = right[j++];
+   }
+
+   public static void quickSort(int[] arr, int low, int high) {
+       if (low < high) {
+           int pi = partition(arr, low, high);
+           quickSort(arr, low, pi - 1);
+           quickSort(arr, pi + 1, high);
+       }
+   }
+
+   public static int partition(int[] arr, int low, int high) {
+       int pivot = arr[high];
+       int i = (low - 1);
+       for (int j = low; j < high; j++) {
+           if (arr[j] < pivot) {
+               i++;
+               int temp = arr[i];
+               arr[i] = arr[j];
+               arr[j] = temp;
+           }
+       }
+       int temp = arr[i + 1];
+       arr[i + 1] = arr[high];
+       arr[high] = temp;
+       return i + 1;
+   }
+}
+
+
+package com.performancetest.sortingcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.performance.sortingcomparison.SortingComparison;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparisonTest {
+   private int[] unsortedArray;
+   private int[] sortedArray;
+
+   @BeforeEach
+   void setUp() {
+       // Generate a random array for testing
+       unsortedArray = SortingComparison.generateRandomArray(1000); // Use 1000 elements for testing
+       sortedArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       Arrays.sort(sortedArray); // Sort using Java's built-in sort for comparison
+   }
+
+   @Test
+   void testBubbleSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.bubbleSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Bubble Sort failed!");
+   }
+
+   @Test
+   void testMergeSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.mergeSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Merge Sort failed!");
+   }
+
+   @Test
+   void testQuickSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.quickSort(testArray, 0, testArray.length - 1);
+       assertArrayEquals(sortedArray, testArray, "Quick Sort failed!");
+   }
+
+   @Test
+   void testSortingEmptyArray() {
+       int[] emptyArray = {};
+       SortingComparison.bubbleSort(emptyArray);
+       SortingComparison.mergeSort(emptyArray);
+       SortingComparison.quickSort(emptyArray, 0, 0);
+       assertArrayEquals(new int[]{}, emptyArray, "Sorting empty array should work!");
+   }
+
+   @Test
+   void testSortingSingleElementArray() {
+       int[] singleElementArray = {42};
+       SortingComparison.bubbleSort(singleElementArray);
+       SortingComparison.mergeSort(singleElementArray);
+       SortingComparison.quickSort(singleElementArray, 0, 0);
+       assertArrayEquals(new int[]{42}, singleElementArray, "Sorting single-element array should work!");
+   }
+
+   @Test
+   void testSortingAlreadySortedArray() {
+       int[] alreadySortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       SortingComparison.bubbleSort(alreadySortedArray);
+       SortingComparison.mergeSort(alreadySortedArray);
+       SortingComparison.quickSort(alreadySortedArray, 0, alreadySortedArray.length - 1);
+       assertArrayEquals(sortedArray, alreadySortedArray, "Sorting an already sorted array should not change it!");
+   }
+
+   @Test
+   void testSortingReverseSortedArray() {
+       int[] reverseSortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       for (int i = 0, j = reverseSortedArray.length - 1; i < j; i++, j--) {
+           int temp = reverseSortedArray[i];
+           reverseSortedArray[i] = reverseSortedArray[j];
+           reverseSortedArray[j] = temp;
+       }
+       SortingComparison.bubbleSort(reverseSortedArray);
+       SortingComparison.mergeSort(reverseSortedArray);
+       SortingComparison.quickSort(reverseSortedArray, 0, reverseSortedArray.length - 1);
+       assertArrayEquals(sortedArray, reverseSortedArray, "Sorting reverse sorted array should work!");
+   }
+}
+
+
+
+
+
+3. Problem Statement: String Concatenation Performance
+Objective:
+Compare the performance of String (O(N²)), StringBuilder (O(N)), and StringBuffer (O(N)) when concatenating a million strings.
+Approach:
+Using String (Immutable, creates new object each time)
+Using StringBuilder (Fast, mutable, thread-unsafe)
+Using StringBuffer (Thread-safe, slightly slower than StringBuilder)
+Comparative Analysis:
+Operations Count (N)
+String (O(N²))
+StringBuilder (O(N))
+StringBuffer (O(N))
+1,000
+10ms
+1ms
+2ms
+10,000
+1s
+10ms
+12ms
+1,000,000
+30m (Unusable)
+50ms
+60ms
+
+Expected Result:
+StringBuilder & StringBuffer are much more efficient than String.
+Use StringBuilder for single-threaded operations and StringBuffer for multi-threaded.
+package com.performance.stringconcatenationperformance;
+
+public class StringConcatenationPerformance {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 10_000, 1_000_000};
+
+       for (int N : sizes) {
+           System.out.println("Dataset Size: " + N);
+
+           // Using String
+           long startTime = System.currentTimeMillis();
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           long endTime = System.currentTimeMillis();
+           System.out.println("Time taken with String: " + (endTime - startTime) + "ms");
+
+           // Using StringBuilder
+           startTime = System.currentTimeMillis();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuilder: " + (endTime - startTime) + "ms");
+
+           // Using StringBuffer
+           startTime = System.currentTimeMillis();
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuffer: " + (endTime - startTime) + "ms");
+
+           System.out.println();
+       }
+   }
+}
+
+
+package com.performancetest.stringconcatenationperformance;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StringConcatenationPerformanceTest {
+
+   @Test
+   void testStringConcatenation() {
+       int N = 1000;
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       assertEquals(N, str.length());
+   }
+
+   @Test
+   void testStringBuilderConcatenation() {
+       int N = 1000;
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       assertEquals(N, sb.length());
+   }
+
+   @Test
+   void testStringBufferConcatenation() {
+       int N = 1000;
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       assertEquals(N, sbf.length());
+   }
+
+   @Test
+   void testPerformanceStringBuilderVsString() {
+       int N = 10000;
+
+       // Measure time for String concatenation
+       long startTime = System.nanoTime();
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       long stringTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuilder
+       startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // StringBuilder should be significantly faster
+       assertTrue(builderTime < stringTime);
+   }
+
+   @Test
+   void testPerformanceStringBufferVsStringBuilder() {
+       int N = 10000;
+
+       // Measure time for StringBuilder
+       long startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuffer
+       startTime = System.nanoTime();
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       long bufferTime = System.nanoTime() - startTime;
+
+       // StringBuffer should be slightly slower than StringBuilder (due to synchronization)
+       assertTrue(builderTime <= bufferTime);
+   }
+}
+
+
+
+
+
+4. Problem Statement: Large File Reading Efficiency
+Objective:
+Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+Approach:
+FileReader: Reads character by character (slower for binary files).
+InputStreamReader: Reads bytes and converts to characters (more efficient).
+Comparative Analysis:
+File Size
+FileReader Time
+InputStreamReader Time
+1MB
+50ms
+30ms
+100MB
+3s
+1.5s
+500MB
+10s
+5s
+
+Expected Result:
+InputStreamReader is more efficient for large files.
+FileReader is preferable for text-based data.
+
+5. Problem Statement: Recursive vs Iterative Fibonacci Computation
+Objective:
+Compare Recursive (O(2ⁿ)) vs Iterative (O(N)) Fibonacci solutions.
+Approach:
+Recursive:
+public static int fibonacciRecursive(int n) {
+    if (n <= 1) return n;
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+Iterative:
+public static int fibonacciIterative(int n) {
+    int a = 0, b = 1, sum;
+    for (int i = 2; i <= n; i++) {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+    return b;
+}
+Comparative Analysis:
+Fibonacci (N)
+Recursive (O(2ⁿ))
+Iterative (O(N))
+10
+1ms
+0.01ms
+30
+5s
+0.05ms
+50
+Unfeasible (>1hr)
+0.1ms
+
+Expected Result:
+Recursive approach is infeasible for large values of N due to exponential growth.
+The iterative approach is significantly faster and memory-efficient.
+package com.performance.fibonaccicomputation;
+
+public class FibonacciComputation{
+
+   // Recursive Fibonacci (Exponential Time Complexity: O(2^N))
+   public static int fibonacciRecursive(int n) {
+       if (n <= 1) return n;
+       return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+   }
+
+   // Iterative Fibonacci (Linear Time Complexity: O(N))
+   public static int fibonacciIterative(int n) {
+       if (n <= 1)
+           return n;
+       int a = 0, b = 1, sum;
+       for (int i = 2; i <= n; i++) {
+           sum = a + b;
+           a = b;
+           b = sum;
+       }
+       return b;
+   }
+
+   public static void runPerformanceTest(int N) {
+       System.out.println("Fibonacci Computation for N = " + N);
+
+       // Measure Recursive Execution Time
+       long startTime = System.nanoTime();
+       int recursiveResult = fibonacciRecursive(N);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci Result: " + recursiveResult);
+       System.out.println("Time taken (Recursive): " + recursiveTime + " ms");
+
+       // Measure Iterative Execution Time
+       startTime = System.nanoTime();
+       int iterativeResult = fibonacciIterative(N);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci Result: " + iterativeResult);
+       System.out.println("Time taken (Iterative): " + iterativeTime + " ms");
+
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] testCases = {10, 30, 50};
+
+       for (int N : testCases) {
+           if (N <= 30) { // Avoid recursive inefficiency for large values
+               runPerformanceTest(N);
+           } else {
+               System.out.println("Skipping Recursive Fibonacci for N = " + N + " (Too Slow)");
+               System.out.println("Fibonacci Iterative Result: " + fibonacciIterative(N));
+               System.out.println();
+           }
+       }
+   }
+}
+
+
+package com.performancetest.fibonaccicomputationtest;
+
+
+
+import com.performance.fibonaccicomputation.FibonacciComputation;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class FibonacciComputationTest {
+
+   @Test
+   void testFibonacciRecursive() {
+       assertEquals(0, FibonacciComputation.fibonacciRecursive(0));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(1));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(2));
+       assertEquals(2, FibonacciComputation.fibonacciRecursive(3));
+       assertEquals(3, FibonacciComputation.fibonacciRecursive(4));
+       assertEquals(5, FibonacciComputation.fibonacciRecursive(5));
+       assertEquals(55, FibonacciComputation.fibonacciRecursive(10));
+       assertEquals(832040, FibonacciComputation.fibonacciRecursive(30));
+   }
+
+   @Test
+   void testFibonacciIterative() {
+       assertEquals(0, FibonacciComputation.fibonacciIterative(0));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(1));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(2));
+       assertEquals(2, FibonacciComputation.fibonacciIterative(3));
+       assertEquals(3, FibonacciComputation.fibonacciIterative(4));
+       assertEquals(5, FibonacciComputation.fibonacciIterative(5));
+       assertEquals(55, FibonacciComputation.fibonacciIterative(10));
+       assertEquals(832040, FibonacciComputation.fibonacciIterative(30));
+   }
+
+   @Test
+   void testPerformance() {
+       int n = 30; // Reasonable limit for recursive
+       long startTime = System.nanoTime();
+       FibonacciComputation.fibonacciRecursive(n);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci for N = " + n + " took: " + recursiveTime + " ms");
+
+       n = 50; // Reasonable limit for iterative
+       startTime = System.nanoTime();
+       FibonacciComputation.fibonacciIterative(n);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci for N = " + n + " took: " + iterativeTime + " ms");
+   }
+}
+
+
+
+6. Problem Statement: Comparing Different Data Structures for Searching
+Objective:
+Compare Array (O(N)), HashSet (O(1)), and TreeSet (O(log N)) for searching elements.
+Approach:
+Array: Linear search (O(N)).
+HashSet: Uses hashing (O(1) on average).
+TreeSet: Balanced BST (O(log N)).
+Comparative Analysis:
+Dataset Size (N)
+Array Search (O(N))
+HashSet Search (O(1))
+TreeSet Search (O(log N))
+1,000
+1ms
+0.01ms
+0.1ms
+100,000
+100ms
+0.01ms
+10ms
+1,000,000
+1s
+0.01ms
+20ms
+
+Expected Result:
+HashSet is fastest for lookups but requires extra memory.
+TreeSet maintains order but is slightly slower than HashSet.
+package com.performance.dataStructuresearchcomparison;
+
+import java.util.*;
+
+public class DataStructureSearchComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 100_000, 1_000_000};
+
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+
+           // Generate random data
+           Random rand = new Random();
+           int[] array = new int[size];
+           HashSet<Integer> hashSet = new HashSet<>();
+           TreeSet<Integer> treeSet = new TreeSet<>();
+
+           for (int i = 0; i < size; i++) {
+               int num = rand.nextInt(size * 10);
+               array[i] = num;
+               hashSet.add(num);
+               treeSet.add(num);
+           }
+
+           // Pick a random element to search
+           int searchElement = array[rand.nextInt(size)];
+
+           // Measure time for Array search (O(N))
+           long start = System.nanoTime();
+           boolean foundArray = linearSearch(array, searchElement);
+           long arrayTime = System.nanoTime() - start;
+
+           // Measure time for HashSet search (O(1))
+           start = System.nanoTime();
+           boolean foundHashSet = hashSet.contains(searchElement);
+           long hashSetTime = System.nanoTime() - start;
+
+           // Measure time for TreeSet search (O(log N))
+           start = System.nanoTime();
+           boolean foundTreeSet = treeSet.contains(searchElement);
+           long treeSetTime = System.nanoTime() - start;
+
+           // Print results
+           System.out.printf("Array Search (O(N)): %d ns, Found: %b\n", arrayTime, foundArray);
+           System.out.printf("HashSet Search (O(1)): %d ns, Found: %b\n", hashSetTime, foundHashSet);
+           System.out.printf("TreeSet Search (O(log N)): %d ns, Found: %b\n", treeSetTime, foundTreeSet);
+           System.out.println();
+       }
+   }
+
+   // Linear search for Array
+   private static boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+
+
+
+package com.performancetest.datastructuresearchcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.*;
+
+public class DataStructureSearchComparisonTest {
+   private int[] array;
+   private HashSet<Integer> hashSet;
+   private TreeSet<Integer> treeSet;
+   private int searchElement;
+
+   @BeforeEach
+   void setUp() {
+       int size = 10000; // Test with 10,000 elements
+       Random rand = new Random();
+       array = new int[size];
+       hashSet = new HashSet<>();
+       treeSet = new TreeSet<>();
+
+       // Populate data structures
+       for (int i = 0; i < size; i++) {
+           int num = rand.nextInt(size * 10);
+           array[i] = num;
+           hashSet.add(num);
+           treeSet.add(num);
+       }
+
+       // Pick a random element from the array for testing
+       searchElement = array[rand.nextInt(size)];
+   }
+
+   @Test
+   void testLinearSearch() {
+       assertTrue(linearSearch(array, searchElement), "Element should be found in Array");
+       assertFalse(linearSearch(array, -1), "Non-existent element should not be found in Array");
+   }
+
+   @Test
+   void testHashSetSearch() {
+       assertTrue(hashSet.contains(searchElement), "Element should be found in HashSet");
+       assertFalse(hashSet.contains(-1), "Non-existent element should not be found in HashSet");
+   }
+
+   @Test
+   void testTreeSetSearch() {
+       assertTrue(treeSet.contains(searchElement), "Element should be found in TreeSet");
+       assertFalse(treeSet.contains(-1), "Non-existent element should not be found in TreeSet");
+   }
+
+   // Linear search for Array
+   private boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+ Problem Statement: Large File Reading Efficiency
+                 Objective:
+                 Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+                 Approach:
+                 FileReader: Reads character by character (slower for binary files).
+                 InputStreamReader: Reads bytes and converts to characters (more efficient).
+                 Comparative Analysis:
+                 File Size
+                 FileReader Time
+                 InputStreamReader Time
+                 1MB
+                 50ms
+                 30ms
+                 100MB
+                 3s
+                 1.5s
+                 500MB
+                 10s
+                 5s
+
+                 Expected Result:
+                 InputStreamReader is more efficient for large files.
+                 FileReader is preferable for text-based data.
+Best Practices for Runtime Analysis & Big O Notation
+When designing algorithms, follow these best practices to ensure optimal time and space complexity.
+🟢 General Algorithm Best Practices
+Choose the right data structure
+Use HashMap for O(1) lookups instead of ArrayList (O(N)).
+Use TreeSet for ordered data retrieval with O(log N) complexity.
+Optimize loops & conditions
+Avoid unnecessary nested loops (O(N²) or worse).
+Use break/return early to reduce iterations.
+Use sorting efficiently
+Prefer Merge Sort (O(N log N)) over Bubble Sort (O(N²)).
+If frequent sorting is needed, consider TreeMap (O(log N) per operation).
+Avoid excessive recursion
+Recursive Fibonacci (O(2ⁿ)) is inefficient; use Memoization (O(N)).
+Use Tail Recursion when applicable.
+Reduce redundant computations
+Store results of expensive operations using caching/memoization.
+Example: Use Dynamic Programming to avoid recomputation.
+🔵 Time & Space Complexity Optimization
+Precompute values when possible
+If computing the same value multiple times, store it in a lookup table.
+Use efficient searching methods
+Instead of Linear Search (O(N)), use Binary Search (O(log N)) for sorted data.
+Use efficient iteration techniques
+Instead of for (int i = 0; i < list.size(); i++), use for-each loops.
+Example: for (String s : list)
+Optimize memory usage
+Use StringBuilder instead of String for concatenation.
+Use primitive types (int, double) over wrapper classes (Integer, Double) when possible.
+Profile & benchmark performance
+Use Java’s System.nanoTime() or JMH (Java Microbenchmark Harness) to measure execution time.
+
+1. Problem Statement: Search a Target in a Large Dataset
+Objective:
+Compare the performance of Linear Search (O(N)) and Binary Search (O(log N)) on different dataset sizes.
+Approach:
+Linear Search: Scan each element until the target is found.
+Binary Search: Sort the data first (O(N log N)), then perform O(log N) search.
+Comparative Analysis:
+Dataset Size (N)
+Linear Search (O(N))
+Binary Search (O(log N))
+1,000
+1ms
+0.01ms
+10,000
+10ms
+0.02ms
+1,000,000
+1s
+0.1ms
+
+Expected Result:
+Binary Search performs much better for large datasets, provided data is sorted.
+package com.performance.searchtarget;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SearchTarget {
+
+   // Linear Search Implementation
+   public static int linearSearch(int[] arr, int target) {
+       for (int i = 0; i < arr.length; i++) {
+           if (arr[i] == target) {
+               return i; // Return index if found
+           }
+       }
+       return -1; // Return -1 if not found
+   }
+
+   // Binary Search Implementation
+   public static int binarySearch(int[] arr, int target) {
+       int left = 0, right = arr.length - 1;
+       while (left <= right) {
+           int mid = left + (right - left) / 2;
+           if (arr[mid] == target)
+               return mid;
+           if (arr[mid] < target)
+               left = mid + 1;
+           else
+               right = mid - 1;
+       }
+       return -1;
+   }
+
+   public static void runSearchTest(int N) {
+       int[] dataset = new int[N];
+       Random random = new Random();
+
+       // Fill the dataset with random numbers
+       for (int i = 0; i < N; i++) {
+           dataset[i] = random.nextInt(N);
+       }
+
+       int target = dataset[random.nextInt(N)]; // Random target from dataset
+
+       // Measure Linear Search time
+       long startTime = System.nanoTime();
+       int linearResult = linearSearch(dataset, target);
+       long endTime = System.nanoTime();
+       double linearTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Sort the array for Binary Search
+       Arrays.sort(dataset);
+
+       // Measure Binary Search time
+       startTime = System.nanoTime();
+       int binaryResult = binarySearch(dataset, target);
+       endTime = System.nanoTime();
+       double binaryTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Print results
+       System.out.println("Dataset Size: " + N);
+       System.out.println("Linear Search Time: " + linearTime + " ms");
+       System.out.println("Binary Search Time: " + binaryTime + " ms");
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] datasetSizes = {1000, 10000, 1000000};
+
+       for (int N : datasetSizes) {
+           runSearchTest(N);
+       }
+   }
+}
+
+
+package com.performancetest.searchtargettest;
+
+import com.performance.searchtarget.SearchTarget;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class SearchTargetTest {
+
+   @Test
+   void testLinearSearch_Found() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(2, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_NotFound() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 7));
+   }
+
+   @Test
+   void testBinarySearch_Found() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(3, SearchTarget.binarySearch(arr, 8));
+   }
+
+   @Test
+   void testBinarySearch_NotFound() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 2));
+   }
+
+   @Test
+   void testBinarySearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementFound() {
+       int[] arr = {10};
+       assertEquals(0, SearchTarget.binarySearch(arr, 10));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementNotFound() {
+       int[] arr = {10};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       Arrays.sort(arr);
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.binarySearch(arr, target) >= 0);
+   }
+
+   @Test
+   void testLinearSearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.linearSearch(arr, target) >= 0);
+   }
+}
+
+
+
+
+
+2. Problem Statement: Sorting Large Data Efficiently
+Objective:
+Compare sorting algorithms Bubble Sort (O(N²)), Merge Sort (O(N log N)), and Quick Sort (O(N log N)).
+Approach:
+Bubble Sort: Repeated swapping (inefficient for large data).
+Merge Sort: Divide & Conquer approach (stable).
+Quick Sort: Partition-based approach (fast but unstable).
+Comparative Analysis:
+Dataset Size (N)
+Bubble Sort (O(N²))
+Merge Sort (O(N log N))
+Quick Sort (O(N log N))
+1,000
+50ms
+5ms
+3ms
+10,000
+5s
+50ms
+30ms
+1,000,000
+Unfeasible (>1hr)
+3s
+2s
+
+Expected Result:
+Bubble Sort is impractical for large datasets.
+Merge Sort & Quick Sort perform well.
+package com.performance.sortingcomparison;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1000, 10000, 1000000};
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+           int[] data = generateRandomArray(size);
+
+           // Measure Bubble Sort (Skipped for large N due to inefficiency)
+           if (size <= 10000) {
+               int[] bubbleData = Arrays.copyOf(data, data.length);
+               long start = System.currentTimeMillis();
+               bubbleSort(bubbleData);
+               long end = System.currentTimeMillis();
+               System.out.println("Bubble Sort: " + (end - start) + " ms");
+           } else {
+               System.out.println("Bubble Sort: Unfeasible");
+           }
+
+           // Measure Merge Sort
+           int[] mergeData = Arrays.copyOf(data, data.length);
+           long start = System.currentTimeMillis();
+           mergeSort(mergeData);
+           long end = System.currentTimeMillis();
+           System.out.println("Merge Sort: " + (end - start) + " ms");
+
+           // Measure Quick Sort
+           int[] quickData = Arrays.copyOf(data, data.length);
+           start = System.currentTimeMillis();
+           quickSort(quickData, 0, quickData.length - 1);
+           end = System.currentTimeMillis();
+           System.out.println("Quick Sort: " + (end - start) + " ms");
+
+           System.out.println("--------------------------");
+       }
+   }
+
+   public static int[] generateRandomArray(int size) {
+       Random random = new Random();
+       int[] array = new int[size];
+       for (int i = 0; i < size; i++) {
+           array[i] = random.nextInt(1000000); // Random numbers up to 1 million
+       }
+       return array;
+   }
+
+   public static void bubbleSort(int[] arr) {
+       int n = arr.length;
+       for (int i = 0; i < n - 1; i++) {
+           for (int j = 0; j < n - i - 1; j++) {
+               if (arr[j] > arr[j + 1]) {
+                   int temp = arr[j];
+                   arr[j] = arr[j + 1];
+                   arr[j + 1] = temp;
+               }
+           }
+       }
+   }
+
+   public static void mergeSort(int[] arr) {
+       if (arr.length < 2) return;
+       int mid = arr.length / 2;
+       int[] left = Arrays.copyOfRange(arr, 0, mid);
+       int[] right = Arrays.copyOfRange(arr, mid, arr.length);
+
+       mergeSort(left);
+       mergeSort(right);
+       merge(arr, left, right);
+   }
+
+   public static void merge(int[] arr, int[] left, int[] right) {
+       int i = 0, j = 0, k = 0;
+       while (i < left.length && j < right.length) {
+           if (left[i] <= right[j]) {
+               arr[k++] = left[i++];
+           } else {
+               arr[k++] = right[j++];
+           }
+       }
+       while (i < left.length) arr[k++] = left[i++];
+       while (j < right.length) arr[k++] = right[j++];
+   }
+
+   public static void quickSort(int[] arr, int low, int high) {
+       if (low < high) {
+           int pi = partition(arr, low, high);
+           quickSort(arr, low, pi - 1);
+           quickSort(arr, pi + 1, high);
+       }
+   }
+
+   public static int partition(int[] arr, int low, int high) {
+       int pivot = arr[high];
+       int i = (low - 1);
+       for (int j = low; j < high; j++) {
+           if (arr[j] < pivot) {
+               i++;
+               int temp = arr[i];
+               arr[i] = arr[j];
+               arr[j] = temp;
+           }
+       }
+       int temp = arr[i + 1];
+       arr[i + 1] = arr[high];
+       arr[high] = temp;
+       return i + 1;
+   }
+}
+
+
+package com.performancetest.sortingcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.performance.sortingcomparison.SortingComparison;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparisonTest {
+   private int[] unsortedArray;
+   private int[] sortedArray;
+
+   @BeforeEach
+   void setUp() {
+       // Generate a random array for testing
+       unsortedArray = SortingComparison.generateRandomArray(1000); // Use 1000 elements for testing
+       sortedArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       Arrays.sort(sortedArray); // Sort using Java's built-in sort for comparison
+   }
+
+   @Test
+   void testBubbleSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.bubbleSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Bubble Sort failed!");
+   }
+
+   @Test
+   void testMergeSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.mergeSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Merge Sort failed!");
+   }
+
+   @Test
+   void testQuickSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.quickSort(testArray, 0, testArray.length - 1);
+       assertArrayEquals(sortedArray, testArray, "Quick Sort failed!");
+   }
+
+   @Test
+   void testSortingEmptyArray() {
+       int[] emptyArray = {};
+       SortingComparison.bubbleSort(emptyArray);
+       SortingComparison.mergeSort(emptyArray);
+       SortingComparison.quickSort(emptyArray, 0, 0);
+       assertArrayEquals(new int[]{}, emptyArray, "Sorting empty array should work!");
+   }
+
+   @Test
+   void testSortingSingleElementArray() {
+       int[] singleElementArray = {42};
+       SortingComparison.bubbleSort(singleElementArray);
+       SortingComparison.mergeSort(singleElementArray);
+       SortingComparison.quickSort(singleElementArray, 0, 0);
+       assertArrayEquals(new int[]{42}, singleElementArray, "Sorting single-element array should work!");
+   }
+
+   @Test
+   void testSortingAlreadySortedArray() {
+       int[] alreadySortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       SortingComparison.bubbleSort(alreadySortedArray);
+       SortingComparison.mergeSort(alreadySortedArray);
+       SortingComparison.quickSort(alreadySortedArray, 0, alreadySortedArray.length - 1);
+       assertArrayEquals(sortedArray, alreadySortedArray, "Sorting an already sorted array should not change it!");
+   }
+
+   @Test
+   void testSortingReverseSortedArray() {
+       int[] reverseSortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       for (int i = 0, j = reverseSortedArray.length - 1; i < j; i++, j--) {
+           int temp = reverseSortedArray[i];
+           reverseSortedArray[i] = reverseSortedArray[j];
+           reverseSortedArray[j] = temp;
+       }
+       SortingComparison.bubbleSort(reverseSortedArray);
+       SortingComparison.mergeSort(reverseSortedArray);
+       SortingComparison.quickSort(reverseSortedArray, 0, reverseSortedArray.length - 1);
+       assertArrayEquals(sortedArray, reverseSortedArray, "Sorting reverse sorted array should work!");
+   }
+}
+
+
+
+
+
+3. Problem Statement: String Concatenation Performance
+Objective:
+Compare the performance of String (O(N²)), StringBuilder (O(N)), and StringBuffer (O(N)) when concatenating a million strings.
+Approach:
+Using String (Immutable, creates new object each time)
+Using StringBuilder (Fast, mutable, thread-unsafe)
+Using StringBuffer (Thread-safe, slightly slower than StringBuilder)
+Comparative Analysis:
+Operations Count (N)
+String (O(N²))
+StringBuilder (O(N))
+StringBuffer (O(N))
+1,000
+10ms
+1ms
+2ms
+10,000
+1s
+10ms
+12ms
+1,000,000
+30m (Unusable)
+50ms
+60ms
+
+Expected Result:
+StringBuilder & StringBuffer are much more efficient than String.
+Use StringBuilder for single-threaded operations and StringBuffer for multi-threaded.
+package com.performance.stringconcatenationperformance;
+
+public class StringConcatenationPerformance {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 10_000, 1_000_000};
+
+       for (int N : sizes) {
+           System.out.println("Dataset Size: " + N);
+
+           // Using String
+           long startTime = System.currentTimeMillis();
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           long endTime = System.currentTimeMillis();
+           System.out.println("Time taken with String: " + (endTime - startTime) + "ms");
+
+           // Using StringBuilder
+           startTime = System.currentTimeMillis();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuilder: " + (endTime - startTime) + "ms");
+
+           // Using StringBuffer
+           startTime = System.currentTimeMillis();
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuffer: " + (endTime - startTime) + "ms");
+
+           System.out.println();
+       }
+   }
+}
+
+
+package com.performancetest.stringconcatenationperformance;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StringConcatenationPerformanceTest {
+
+   @Test
+   void testStringConcatenation() {
+       int N = 1000;
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       assertEquals(N, str.length());
+   }
+
+   @Test
+   void testStringBuilderConcatenation() {
+       int N = 1000;
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       assertEquals(N, sb.length());
+   }
+
+   @Test
+   void testStringBufferConcatenation() {
+       int N = 1000;
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       assertEquals(N, sbf.length());
+   }
+
+   @Test
+   void testPerformanceStringBuilderVsString() {
+       int N = 10000;
+
+       // Measure time for String concatenation
+       long startTime = System.nanoTime();
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       long stringTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuilder
+       startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // StringBuilder should be significantly faster
+       assertTrue(builderTime < stringTime);
+   }
+
+   @Test
+   void testPerformanceStringBufferVsStringBuilder() {
+       int N = 10000;
+
+       // Measure time for StringBuilder
+       long startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuffer
+       startTime = System.nanoTime();
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       long bufferTime = System.nanoTime() - startTime;
+
+       // StringBuffer should be slightly slower than StringBuilder (due to synchronization)
+       assertTrue(builderTime <= bufferTime);
+   }
+}
+
+
+
+
+
+4. Problem Statement: Large File Reading Efficiency
+Objective:
+Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+Approach:
+FileReader: Reads character by character (slower for binary files).
+InputStreamReader: Reads bytes and converts to characters (more efficient).
+Comparative Analysis:
+File Size
+FileReader Time
+InputStreamReader Time
+1MB
+50ms
+30ms
+100MB
+3s
+1.5s
+500MB
+10s
+5s
+
+Expected Result:
+InputStreamReader is more efficient for large files.
+FileReader is preferable for text-based data.
+
+5. Problem Statement: Recursive vs Iterative Fibonacci Computation
+Objective:
+Compare Recursive (O(2ⁿ)) vs Iterative (O(N)) Fibonacci solutions.
+Approach:
+Recursive:
+public static int fibonacciRecursive(int n) {
+    if (n <= 1) return n;
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+Iterative:
+public static int fibonacciIterative(int n) {
+    int a = 0, b = 1, sum;
+    for (int i = 2; i <= n; i++) {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+    return b;
+}
+Comparative Analysis:
+Fibonacci (N)
+Recursive (O(2ⁿ))
+Iterative (O(N))
+10
+1ms
+0.01ms
+30
+5s
+0.05ms
+50
+Unfeasible (>1hr)
+0.1ms
+
+Expected Result:
+Recursive approach is infeasible for large values of N due to exponential growth.
+The iterative approach is significantly faster and memory-efficient.
+package com.performance.fibonaccicomputation;
+
+public class FibonacciComputation{
+
+   // Recursive Fibonacci (Exponential Time Complexity: O(2^N))
+   public static int fibonacciRecursive(int n) {
+       if (n <= 1) return n;
+       return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+   }
+
+   // Iterative Fibonacci (Linear Time Complexity: O(N))
+   public static int fibonacciIterative(int n) {
+       if (n <= 1)
+           return n;
+       int a = 0, b = 1, sum;
+       for (int i = 2; i <= n; i++) {
+           sum = a + b;
+           a = b;
+           b = sum;
+       }
+       return b;
+   }
+
+   public static void runPerformanceTest(int N) {
+       System.out.println("Fibonacci Computation for N = " + N);
+
+       // Measure Recursive Execution Time
+       long startTime = System.nanoTime();
+       int recursiveResult = fibonacciRecursive(N);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci Result: " + recursiveResult);
+       System.out.println("Time taken (Recursive): " + recursiveTime + " ms");
+
+       // Measure Iterative Execution Time
+       startTime = System.nanoTime();
+       int iterativeResult = fibonacciIterative(N);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci Result: " + iterativeResult);
+       System.out.println("Time taken (Iterative): " + iterativeTime + " ms");
+
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] testCases = {10, 30, 50};
+
+       for (int N : testCases) {
+           if (N <= 30) { // Avoid recursive inefficiency for large values
+               runPerformanceTest(N);
+           } else {
+               System.out.println("Skipping Recursive Fibonacci for N = " + N + " (Too Slow)");
+               System.out.println("Fibonacci Iterative Result: " + fibonacciIterative(N));
+               System.out.println();
+           }
+       }
+   }
+}
+
+
+package com.performancetest.fibonaccicomputationtest;
+
+
+
+import com.performance.fibonaccicomputation.FibonacciComputation;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class FibonacciComputationTest {
+
+   @Test
+   void testFibonacciRecursive() {
+       assertEquals(0, FibonacciComputation.fibonacciRecursive(0));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(1));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(2));
+       assertEquals(2, FibonacciComputation.fibonacciRecursive(3));
+       assertEquals(3, FibonacciComputation.fibonacciRecursive(4));
+       assertEquals(5, FibonacciComputation.fibonacciRecursive(5));
+       assertEquals(55, FibonacciComputation.fibonacciRecursive(10));
+       assertEquals(832040, FibonacciComputation.fibonacciRecursive(30));
+   }
+
+   @Test
+   void testFibonacciIterative() {
+       assertEquals(0, FibonacciComputation.fibonacciIterative(0));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(1));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(2));
+       assertEquals(2, FibonacciComputation.fibonacciIterative(3));
+       assertEquals(3, FibonacciComputation.fibonacciIterative(4));
+       assertEquals(5, FibonacciComputation.fibonacciIterative(5));
+       assertEquals(55, FibonacciComputation.fibonacciIterative(10));
+       assertEquals(832040, FibonacciComputation.fibonacciIterative(30));
+   }
+
+   @Test
+   void testPerformance() {
+       int n = 30; // Reasonable limit for recursive
+       long startTime = System.nanoTime();
+       FibonacciComputation.fibonacciRecursive(n);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci for N = " + n + " took: " + recursiveTime + " ms");
+
+       n = 50; // Reasonable limit for iterative
+       startTime = System.nanoTime();
+       FibonacciComputation.fibonacciIterative(n);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci for N = " + n + " took: " + iterativeTime + " ms");
+   }
+}
+
+
+
+6. Problem Statement: Comparing Different Data Structures for Searching
+Objective:
+Compare Array (O(N)), HashSet (O(1)), and TreeSet (O(log N)) for searching elements.
+Approach:
+Array: Linear search (O(N)).
+HashSet: Uses hashing (O(1) on average).
+TreeSet: Balanced BST (O(log N)).
+Comparative Analysis:
+Dataset Size (N)
+Array Search (O(N))
+HashSet Search (O(1))
+TreeSet Search (O(log N))
+1,000
+1ms
+0.01ms
+0.1ms
+100,000
+100ms
+0.01ms
+10ms
+1,000,000
+1s
+0.01ms
+20ms
+
+Expected Result:
+HashSet is fastest for lookups but requires extra memory.
+TreeSet maintains order but is slightly slower than HashSet.
+package com.performance.dataStructuresearchcomparison;
+
+import java.util.*;
+
+public class DataStructureSearchComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 100_000, 1_000_000};
+
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+
+           // Generate random data
+           Random rand = new Random();
+           int[] array = new int[size];
+           HashSet<Integer> hashSet = new HashSet<>();
+           TreeSet<Integer> treeSet = new TreeSet<>();
+
+           for (int i = 0; i < size; i++) {
+               int num = rand.nextInt(size * 10);
+               array[i] = num;
+               hashSet.add(num);
+               treeSet.add(num);
+           }
+
+           // Pick a random element to search
+           int searchElement = array[rand.nextInt(size)];
+
+           // Measure time for Array search (O(N))
+           long start = System.nanoTime();
+           boolean foundArray = linearSearch(array, searchElement);
+           long arrayTime = System.nanoTime() - start;
+
+           // Measure time for HashSet search (O(1))
+           start = System.nanoTime();
+           boolean foundHashSet = hashSet.contains(searchElement);
+           long hashSetTime = System.nanoTime() - start;
+
+           // Measure time for TreeSet search (O(log N))
+           start = System.nanoTime();
+           boolean foundTreeSet = treeSet.contains(searchElement);
+           long treeSetTime = System.nanoTime() - start;
+
+           // Print results
+           System.out.printf("Array Search (O(N)): %d ns, Found: %b\n", arrayTime, foundArray);
+           System.out.printf("HashSet Search (O(1)): %d ns, Found: %b\n", hashSetTime, foundHashSet);
+           System.out.printf("TreeSet Search (O(log N)): %d ns, Found: %b\n", treeSetTime, foundTreeSet);
+           System.out.println();
+       }
+   }
+
+   // Linear search for Array
+   private static boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+
+
+
+package com.performancetest.datastructuresearchcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.*;
+
+public class DataStructureSearchComparisonTest {
+   private int[] array;
+   private HashSet<Integer> hashSet;
+   private TreeSet<Integer> treeSet;
+   private int searchElement;
+
+   @BeforeEach
+   void setUp() {
+       int size = 10000; // Test with 10,000 elements
+       Random rand = new Random();
+       array = new int[size];
+       hashSet = new HashSet<>();
+       treeSet = new TreeSet<>();
+
+       // Populate data structures
+       for (int i = 0; i < size; i++) {
+           int num = rand.nextInt(size * 10);
+           array[i] = num;
+           hashSet.add(num);
+           treeSet.add(num);
+       }
+
+       // Pick a random element from the array for testing
+       searchElement = array[rand.nextInt(size)];
+   }
+
+   @Test
+   void testLinearSearch() {
+       assertTrue(linearSearch(array, searchElement), "Element should be found in Array");
+       assertFalse(linearSearch(array, -1), "Non-existent element should not be found in Array");
+   }
+
+   @Test
+   void testHashSetSearch() {
+       assertTrue(hashSet.contains(searchElement), "Element should be found in HashSet");
+       assertFalse(hashSet.contains(-1), "Non-existent element should not be found in HashSet");
+   }
+
+   @Test
+   void testTreeSetSearch() {
+       assertTrue(treeSet.contains(searchElement), "Element should be found in TreeSet");
+       assertFalse(treeSet.contains(-1), "Non-existent element should not be found in TreeSet");
+   }
+
+   // Linear search for Array
+   private boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+     Problem Statement: Large File Reading Efficiency
+                     Objective:
+                     Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+                     Approach:
+                     FileReader: Reads character by character (slower for binary files).
+                     InputStreamReader: Reads bytes and converts to characters (more efficient).
+                     Comparative Analysis:
+                     File Size
+                     FileReader Time
+                     InputStreamReader Time
+                     1MB
+                     50ms
+                     30ms
+                     100MB
+                     3s
+                     1.5s
+                     500MB
+                     10s
+                     5s
+
+                     Expected Result:
+                     InputStreamReader is more efficient for large files.
+                     FileReader is preferable for text-based data.
+    Best Practices for Runtime Analysis & Big O Notation
+    When designing algorithms, follow these best practices to ensure optimal time and space complexity.
+    🟢 General Algorithm Best Practices
+    Choose the right data structure
+    Use HashMap for O(1) lookups instead of ArrayList (O(N)).
+    Use TreeSet for ordered data retrieval with O(log N) complexity.
+    Optimize loops & conditions
+    Avoid unnecessary nested loops (O(N²) or worse).
+    Use break/return early to reduce iterations.
+    Use sorting efficiently
+    Prefer Merge Sort (O(N log N)) over Bubble Sort (O(N²)).
+    If frequent sorting is needed, consider TreeMap (O(log N) per operation).
+    Avoid excessive recursion
+    Recursive Fibonacci (O(2ⁿ)) is inefficient; use Memoization (O(N)).
+    Use Tail Recursion when applicable.
+    Reduce redundant computations
+    Store results of expensive operations using caching/memoization.
+    Example: Use Dynamic Programming to avoid recomputation.
+    🔵 Time & Space Complexity Optimization
+    Precompute values when possible
+    If computing the same value multiple times, store it in a lookup table.
+    Use efficient searching methods
+    Instead of Linear Search (O(N)), use Binary Search (O(log N)) for sorted data.
+    Use efficient iteration techniques
+    Instead of for (int i = 0; i < list.size(); i++), use for-each loops.
+    Example: for (String s : list)
+    Optimize memory usage
+    Use StringBuilder instead of String for concatenation.
+    Use primitive types (int, double) over wrapper classes (Integer, Double) when possible.
+    Profile & benchmark performance
+    Use Java’s System.nanoTime() or JMH (Java Microbenchmark Harness) to measure execution time.
+
+    1. Problem Statement: Search a Target in a Large Dataset
+    Objective:
+    Compare the performance of Linear Search (O(N)) and Binary Search (O(log N)) on different dataset sizes.
+    Approach:
+    Linear Search: Scan each element until the target is found.
+    Binary Search: Sort the data first (O(N log N)), then perform O(log N) search.
+    Comparative Analysis:
+    Dataset Size (N)
+    Linear Search (O(N))
+    Binary Search (O(log N))
+    1,000
+    1ms
+    0.01ms
+    10,000
+    10ms
+    0.02ms
+    1,000,000
+    1s
+    0.1ms
+
+    Expected Result:
+    Binary Search performs much better for large datasets, provided data is sorted.
+    package com.performance.searchtarget;
+
+    import java.util.Arrays;
+    import java.util.Random;
+
+    public class SearchTarget {
+
+       // Linear Search Implementation
+       public static int linearSearch(int[] arr, int target) {
+           for (int i = 0; i < arr.length; i++) {
+               if (arr[i] == target) {
+                   return i; // Return index if found
+               }
+           }
+           return -1; // Return -1 if not found
+       }
+
+       // Binary Search Implementation
+       public static int binarySearch(int[] arr, int target) {
+           int left = 0, right = arr.length - 1;
+           while (left <= right) {
+               int mid = left + (right - left) / 2;
+               if (arr[mid] == target)
+                   return mid;
+               if (arr[mid] < target)
+                   left = mid + 1;
+               else
+                   right = mid - 1;
+           }
+           return -1;
+       }
+
+       public static void runSearchTest(int N) {
+           int[] dataset = new int[N];
+           Random random = new Random();
+
+           // Fill the dataset with random numbers
+           for (int i = 0; i < N; i++) {
+               dataset[i] = random.nextInt(N);
+           }
+
+           int target = dataset[random.nextInt(N)]; // Random target from dataset
+
+           // Measure Linear Search time
+           long startTime = System.nanoTime();
+           int linearResult = linearSearch(dataset, target);
+           long endTime = System.nanoTime();
+           double linearTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+           // Sort the array for Binary Search
+           Arrays.sort(dataset);
+
+           // Measure Binary Search time
+           startTime = System.nanoTime();
+           int binaryResult = binarySearch(dataset, target);
+           endTime = System.nanoTime();
+           double binaryTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+           // Print results
+           System.out.println("Dataset Size: " + N);
+           System.out.println("Linear Search Time: " + linearTime + " ms");
+           System.out.println("Binary Search Time: " + binaryTime + " ms");
+           System.out.println();
+       }
+
+       public static void main(String[] args) {
+           int[] datasetSizes = {1000, 10000, 1000000};
+
+           for (int N : datasetSizes) {
+               runSearchTest(N);
+           }
+       }
+    }
+
+
+    package com.performancetest.searchtargettest;
+
+    import com.performance.searchtarget.SearchTarget;
+    import org.junit.jupiter.api.Test;
+    import java.util.Arrays;
+    import java.util.Random;
+
+    import static org.junit.jupiter.api.Assertions.*;
+
+    class SearchTargetTest {
+
+       @Test
+       void testLinearSearch_Found() {
+           int[] arr = {1, 3, 5, 7, 9};
+           assertEquals(2, SearchTarget.linearSearch(arr, 5));
+       }
+
+       @Test
+       void testLinearSearch_NotFound() {
+           int[] arr = {2, 4, 6, 8, 10};
+           assertEquals(-1, SearchTarget.linearSearch(arr, 7));
+       }
+
+       @Test
+       void testBinarySearch_Found() {
+           int[] arr = {2, 4, 6, 8, 10};
+           assertEquals(3, SearchTarget.binarySearch(arr, 8));
+       }
+
+       @Test
+       void testBinarySearch_NotFound() {
+           int[] arr = {1, 3, 5, 7, 9};
+           assertEquals(-1, SearchTarget.binarySearch(arr, 2));
+       }
+
+       @Test
+       void testBinarySearch_EmptyArray() {
+           int[] arr = {};
+           assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+       }
+
+       @Test
+       void testLinearSearch_EmptyArray() {
+           int[] arr = {};
+           assertEquals(-1, SearchTarget.linearSearch(arr, 5));
+       }
+
+       @Test
+       void testBinarySearch_SingleElementFound() {
+           int[] arr = {10};
+           assertEquals(0, SearchTarget.binarySearch(arr, 10));
+       }
+
+       @Test
+       void testBinarySearch_SingleElementNotFound() {
+           int[] arr = {10};
+           assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+       }
+
+       @Test
+       void testBinarySearch_RandomArray() {
+           int[] arr = new Random().ints(100, 1, 1000).toArray();
+           Arrays.sort(arr);
+           int target = arr[arr.length / 2]; // Pick a middle element
+           assertTrue(SearchTarget.binarySearch(arr, target) >= 0);
+       }
+
+       @Test
+       void testLinearSearch_RandomArray() {
+           int[] arr = new Random().ints(100, 1, 1000).toArray();
+           int target = arr[arr.length / 2]; // Pick a middle element
+           assertTrue(SearchTarget.linearSearch(arr, target) >= 0);
+       }
+    }
+
+
+
+
+
+    2. Problem Statement: Sorting Large Data Efficiently
+    Objective:
+    Compare sorting algorithms Bubble Sort (O(N²)), Merge Sort (O(N log N)), and Quick Sort (O(N log N)).
+    Approach:
+    Bubble Sort: Repeated swapping (inefficient for large data).
+    Merge Sort: Divide & Conquer approach (stable).
+    Quick Sort: Partition-based approach (fast but unstable).
+    Comparative Analysis:
+    Dataset Size (N)
+    Bubble Sort (O(N²))
+    Merge Sort (O(N log N))
+    Quick Sort (O(N log N))
+    1,000
+    50ms
+    5ms
+    3ms
+    10,000
+    5s
+    50ms
+    30ms
+    1,000,000
+    Unfeasible (>1hr)
+    3s
+    2s
+
+    Expected Result:
+    Bubble Sort is impractical for large datasets.
+    Merge Sort & Quick Sort perform well.
+    package com.performance.sortingcomparison;
+
+    import java.util.Arrays;
+    import java.util.Random;
+
+    public class SortingComparison {
+       public static void main(String[] args) {
+           int[] sizes = {1000, 10000, 1000000};
+           for (int size : sizes) {
+               System.out.println("Dataset Size: " + size);
+               int[] data = generateRandomArray(size);
+
+               // Measure Bubble Sort (Skipped for large N due to inefficiency)
+               if (size <= 10000) {
+                   int[] bubbleData = Arrays.copyOf(data, data.length);
+                   long start = System.currentTimeMillis();
+                   bubbleSort(bubbleData);
+                   long end = System.currentTimeMillis();
+                   System.out.println("Bubble Sort: " + (end - start) + " ms");
+               } else {
+                   System.out.println("Bubble Sort: Unfeasible");
+               }
+
+               // Measure Merge Sort
+               int[] mergeData = Arrays.copyOf(data, data.length);
+               long start = System.currentTimeMillis();
+               mergeSort(mergeData);
+               long end = System.currentTimeMillis();
+               System.out.println("Merge Sort: " + (end - start) + " ms");
+
+               // Measure Quick Sort
+               int[] quickData = Arrays.copyOf(data, data.length);
+               start = System.currentTimeMillis();
+               quickSort(quickData, 0, quickData.length - 1);
+               end = System.currentTimeMillis();
+               System.out.println("Quick Sort: " + (end - start) + " ms");
+
+               System.out.println("--------------------------");
+           }
+       }
+
+       public static int[] generateRandomArray(int size) {
+           Random random = new Random();
+           int[] array = new int[size];
+           for (int i = 0; i < size; i++) {
+               array[i] = random.nextInt(1000000); // Random numbers up to 1 million
+           }
+           return array;
+       }
+
+       public static void bubbleSort(int[] arr) {
+           int n = arr.length;
+           for (int i = 0; i < n - 1; i++) {
+               for (int j = 0; j < n - i - 1; j++) {
+                   if (arr[j] > arr[j + 1]) {
+                       int temp = arr[j];
+                       arr[j] = arr[j + 1];
+                       arr[j + 1] = temp;
+                   }
+               }
+           }
+       }
+
+       public static void mergeSort(int[] arr) {
+           if (arr.length < 2) return;
+           int mid = arr.length / 2;
+           int[] left = Arrays.copyOfRange(arr, 0, mid);
+           int[] right = Arrays.copyOfRange(arr, mid, arr.length);
+
+           mergeSort(left);
+           mergeSort(right);
+           merge(arr, left, right);
+       }
+
+       public static void merge(int[] arr, int[] left, int[] right) {
+           int i = 0, j = 0, k = 0;
+           while (i < left.length && j < right.length) {
+               if (left[i] <= right[j]) {
+                   arr[k++] = left[i++];
+               } else {
+                   arr[k++] = right[j++];
+               }
+           }
+           while (i < left.length) arr[k++] = left[i++];
+           while (j < right.length) arr[k++] = right[j++];
+       }
+
+       public static void quickSort(int[] arr, int low, int high) {
+           if (low < high) {
+               int pi = partition(arr, low, high);
+               quickSort(arr, low, pi - 1);
+               quickSort(arr, pi + 1, high);
+           }
+       }
+
+       public static int partition(int[] arr, int low, int high) {
+           int pivot = arr[high];
+           int i = (low - 1);
+           for (int j = low; j < high; j++) {
+               if (arr[j] < pivot) {
+                   i++;
+                   int temp = arr[i];
+                   arr[i] = arr[j];
+                   arr[j] = temp;
+               }
+           }
+           int temp = arr[i + 1];
+           arr[i + 1] = arr[high];
+           arr[high] = temp;
+           return i + 1;
+       }
+    }
+
+
+    package com.performancetest.sortingcomparisontest;
+
+    import static org.junit.jupiter.api.Assertions.*;
+
+    import com.performance.sortingcomparison.SortingComparison;
+    import org.junit.jupiter.api.BeforeEach;
+    import org.junit.jupiter.api.Test;
+    import java.util.Arrays;
+    import java.util.Random;
+
+    public class SortingComparisonTest {
+       private int[] unsortedArray;
+       private int[] sortedArray;
+
+       @BeforeEach
+       void setUp() {
+           // Generate a random array for testing
+           unsortedArray = SortingComparison.generateRandomArray(1000); // Use 1000 elements for testing
+           sortedArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+           Arrays.sort(sortedArray); // Sort using Java's built-in sort for comparison
+       }
+
+       @Test
+       void testBubbleSort() {
+           int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+           SortingComparison.bubbleSort(testArray);
+           assertArrayEquals(sortedArray, testArray, "Bubble Sort failed!");
+       }
+
+       @Test
+       void testMergeSort() {
+           int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+           SortingComparison.mergeSort(testArray);
+           assertArrayEquals(sortedArray, testArray, "Merge Sort failed!");
+       }
+
+       @Test
+       void testQuickSort() {
+           int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+           SortingComparison.quickSort(testArray, 0, testArray.length - 1);
+           assertArrayEquals(sortedArray, testArray, "Quick Sort failed!");
+       }
+
+       @Test
+       void testSortingEmptyArray() {
+           int[] emptyArray = {};
+           SortingComparison.bubbleSort(emptyArray);
+           SortingComparison.mergeSort(emptyArray);
+           SortingComparison.quickSort(emptyArray, 0, 0);
+           assertArrayEquals(new int[]{}, emptyArray, "Sorting empty array should work!");
+       }
+
+       @Test
+       void testSortingSingleElementArray() {
+           int[] singleElementArray = {42};
+           SortingComparison.bubbleSort(singleElementArray);
+           SortingComparison.mergeSort(singleElementArray);
+           SortingComparison.quickSort(singleElementArray, 0, 0);
+           assertArrayEquals(new int[]{42}, singleElementArray, "Sorting single-element array should work!");
+       }
+
+       @Test
+       void testSortingAlreadySortedArray() {
+           int[] alreadySortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+           SortingComparison.bubbleSort(alreadySortedArray);
+           SortingComparison.mergeSort(alreadySortedArray);
+           SortingComparison.quickSort(alreadySortedArray, 0, alreadySortedArray.length - 1);
+           assertArrayEquals(sortedArray, alreadySortedArray, "Sorting an already sorted array should not change it!");
+       }
+
+       @Test
+       void testSortingReverseSortedArray() {
+           int[] reverseSortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+           for (int i = 0, j = reverseSortedArray.length - 1; i < j; i++, j--) {
+               int temp = reverseSortedArray[i];
+               reverseSortedArray[i] = reverseSortedArray[j];
+               reverseSortedArray[j] = temp;
+           }
+           SortingComparison.bubbleSort(reverseSortedArray);
+           SortingComparison.mergeSort(reverseSortedArray);
+           SortingComparison.quickSort(reverseSortedArray, 0, reverseSortedArray.length - 1);
+           assertArrayEquals(sortedArray, reverseSortedArray, "Sorting reverse sorted array should work!");
+       }
+    }
+
+
+
+
+
+    3. Problem Statement: String Concatenation Performance
+    Objective:
+    Compare the performance of String (O(N²)), StringBuilder (O(N)), and StringBuffer (O(N)) when concatenating a million strings.
+    Approach:
+    Using String (Immutable, creates new object each time)
+    Using StringBuilder (Fast, mutable, thread-unsafe)
+    Using StringBuffer (Thread-safe, slightly slower than StringBuilder)
+    Comparative Analysis:
+    Operations Count (N)
+    String (O(N²))
+    StringBuilder (O(N))
+    StringBuffer (O(N))
+    1,000
+    10ms
+    1ms
+    2ms
+    10,000
+    1s
+    10ms
+    12ms
+    1,000,000
+    30m (Unusable)
+    50ms
+    60ms
+
+    Expected Result:
+    StringBuilder & StringBuffer are much more efficient than String.
+    Use StringBuilder for single-threaded operations and StringBuffer for multi-threaded.
+    package com.performance.stringconcatenationperformance;
+
+    public class StringConcatenationPerformance {
+       public static void main(String[] args) {
+           int[] sizes = {1_000, 10_000, 1_000_000};
+
+           for (int N : sizes) {
+               System.out.println("Dataset Size: " + N);
+
+               // Using String
+               long startTime = System.currentTimeMillis();
+               String str = "";
+               for (int i = 0; i < N; i++) {
+                   str += "a"; // Inefficient
+               }
+               long endTime = System.currentTimeMillis();
+               System.out.println("Time taken with String: " + (endTime - startTime) + "ms");
+
+               // Using StringBuilder
+               startTime = System.currentTimeMillis();
+               StringBuilder sb = new StringBuilder();
+               for (int i = 0; i < N; i++) {
+                   sb.append("a");
+               }
+               endTime = System.currentTimeMillis();
+               System.out.println("Time taken with StringBuilder: " + (endTime - startTime) + "ms");
+
+               // Using StringBuffer
+               startTime = System.currentTimeMillis();
+               StringBuffer sbf = new StringBuffer();
+               for (int i = 0; i < N; i++) {
+                   sbf.append("a");
+               }
+               endTime = System.currentTimeMillis();
+               System.out.println("Time taken with StringBuffer: " + (endTime - startTime) + "ms");
+
+               System.out.println();
+           }
+       }
+    }
+
+
+    package com.performancetest.stringconcatenationperformance;
+
+    import org.junit.jupiter.api.Test;
+
+    import static org.junit.jupiter.api.Assertions.*;
+
+    class StringConcatenationPerformanceTest {
+
+       @Test
+       void testStringConcatenation() {
+           int N = 1000;
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           assertEquals(N, str.length());
+       }
+
+       @Test
+       void testStringBuilderConcatenation() {
+           int N = 1000;
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           assertEquals(N, sb.length());
+       }
+
+       @Test
+       void testStringBufferConcatenation() {
+           int N = 1000;
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           assertEquals(N, sbf.length());
+       }
+
+       @Test
+       void testPerformanceStringBuilderVsString() {
+           int N = 10000;
+
+           // Measure time for String concatenation
+           long startTime = System.nanoTime();
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           long stringTime = System.nanoTime() - startTime;
+
+           // Measure time for StringBuilder
+           startTime = System.nanoTime();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           long builderTime = System.nanoTime() - startTime;
+
+           // StringBuilder should be significantly faster
+           assertTrue(builderTime < stringTime);
+       }
+
+       @Test
+       void testPerformanceStringBufferVsStringBuilder() {
+           int N = 10000;
+
+           // Measure time for StringBuilder
+           long startTime = System.nanoTime();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           long builderTime = System.nanoTime() - startTime;
+
+           // Measure time for StringBuffer
+           startTime = System.nanoTime();
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           long bufferTime = System.nanoTime() - startTime;
+
+           // StringBuffer should be slightly slower than StringBuilder (due to synchronization)
+           assertTrue(builderTime <= bufferTime);
+       }
+    }
+
+
+
+
+
+    4. Problem Statement: Large File Reading Efficiency
+    Objective:
+    Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+    Approach:
+    FileReader: Reads character by character (slower for binary files).
+    InputStreamReader: Reads bytes and converts to characters (more efficient).
+    Comparative Analysis:
+    File Size
+    FileReader Time
+    InputStreamReader Time
+    1MB
+    50ms
+    30ms
+    100MB
+    3s
+    1.5s
+    500MB
+    10s
+    5s
+
+    Expected Result:
+    InputStreamReader is more efficient for large files.
+    FileReader is preferable for text-based data.
+
+    5. Problem Statement: Recursive vs Iterative Fibonacci Computation
+    Objective:
+    Compare Recursive (O(2ⁿ)) vs Iterative (O(N)) Fibonacci solutions.
+    Approach:
+    Recursive:
+    public static int fibonacciRecursive(int n) {
+        if (n <= 1) return n;
+        return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+    }
+
+    Iterative:
+    public static int fibonacciIterative(int n) {
+        int a = 0, b = 1, sum;
+        for (int i = 2; i <= n; i++) {
+            sum = a + b;
+            a = b;
+            b = sum;
+        }
+        return b;
+    }
+    Comparative Analysis:
+    Fibonacci (N)
+    Recursive (O(2ⁿ))
+    Iterative (O(N))
+    10
+    1ms
+    0.01ms
+    30
+    5s
+    0.05ms
+    50
+    Unfeasible (>1hr)
+    0.1ms
+
+    Expected Result:
+    Recursive approach is infeasible for large values of N due to exponential growth.
+    The iterative approach is significantly faster and memory-efficient.
+    package com.performance.fibonaccicomputation;
+
+    public class FibonacciComputation{
+
+       // Recursive Fibonacci (Exponential Time Complexity: O(2^N))
+       public static int fibonacciRecursive(int n) {
+           if (n <= 1) return n;
+           return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+       }
+
+       // Iterative Fibonacci (Linear Time Complexity: O(N))
+       public static int fibonacciIterative(int n) {
+           if (n <= 1)
+               return n;
+           int a = 0, b = 1, sum;
+           for (int i = 2; i <= n; i++) {
+               sum = a + b;
+               a = b;
+               b = sum;
+           }
+           return b;
+       }
+
+       public static void runPerformanceTest(int N) {
+           System.out.println("Fibonacci Computation for N = " + N);
+
+           // Measure Recursive Execution Time
+           long startTime = System.nanoTime();
+           int recursiveResult = fibonacciRecursive(N);
+           long endTime = System.nanoTime();
+           double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+           System.out.println("Recursive Fibonacci Result: " + recursiveResult);
+           System.out.println("Time taken (Recursive): " + recursiveTime + " ms");
+
+           // Measure Iterative Execution Time
+           startTime = System.nanoTime();
+           int iterativeResult = fibonacciIterative(N);
+           endTime = System.nanoTime();
+           double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+           System.out.println("Iterative Fibonacci Result: " + iterativeResult);
+           System.out.println("Time taken (Iterative): " + iterativeTime + " ms");
+
+           System.out.println();
+       }
+
+       public static void main(String[] args) {
+           int[] testCases = {10, 30, 50};
+
+           for (int N : testCases) {
+               if (N <= 30) { // Avoid recursive inefficiency for large values
+                   runPerformanceTest(N);
+               } else {
+                   System.out.println("Skipping Recursive Fibonacci for N = " + N + " (Too Slow)");
+                   System.out.println("Fibonacci Iterative Result: " + fibonacciIterative(N));
+                   System.out.println();
+               }
+           }
+       }
+    }
+
+
+    package com.performancetest.fibonaccicomputationtest;
+
+
+
+    import com.performance.fibonaccicomputation.FibonacciComputation;
+    import org.junit.jupiter.api.Test;
+    import static org.junit.jupiter.api.Assertions.*;
+
+    class FibonacciComputationTest {
+
+       @Test
+       void testFibonacciRecursive() {
+           assertEquals(0, FibonacciComputation.fibonacciRecursive(0));
+           assertEquals(1, FibonacciComputation.fibonacciRecursive(1));
+           assertEquals(1, FibonacciComputation.fibonacciRecursive(2));
+           assertEquals(2, FibonacciComputation.fibonacciRecursive(3));
+           assertEquals(3, FibonacciComputation.fibonacciRecursive(4));
+           assertEquals(5, FibonacciComputation.fibonacciRecursive(5));
+           assertEquals(55, FibonacciComputation.fibonacciRecursive(10));
+           assertEquals(832040, FibonacciComputation.fibonacciRecursive(30));
+       }
+
+       @Test
+       void testFibonacciIterative() {
+           assertEquals(0, FibonacciComputation.fibonacciIterative(0));
+           assertEquals(1, FibonacciComputation.fibonacciIterative(1));
+           assertEquals(1, FibonacciComputation.fibonacciIterative(2));
+           assertEquals(2, FibonacciComputation.fibonacciIterative(3));
+           assertEquals(3, FibonacciComputation.fibonacciIterative(4));
+           assertEquals(5, FibonacciComputation.fibonacciIterative(5));
+           assertEquals(55, FibonacciComputation.fibonacciIterative(10));
+           assertEquals(832040, FibonacciComputation.fibonacciIterative(30));
+       }
+
+       @Test
+       void testPerformance() {
+           int n = 30; // Reasonable limit for recursive
+           long startTime = System.nanoTime();
+           FibonacciComputation.fibonacciRecursive(n);
+           long endTime = System.nanoTime();
+           double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+           System.out.println("Recursive Fibonacci for N = " + n + " took: " + recursiveTime + " ms");
+
+           n = 50; // Reasonable limit for iterative
+           startTime = System.nanoTime();
+           FibonacciComputation.fibonacciIterative(n);
+           endTime = System.nanoTime();
+           double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+           System.out.println("Iterative Fibonacci for N = " + n + " took: " + iterativeTime + " ms");
+       }
+    }
+
+
+
+    6. Problem Statement: Comparing Different Data Structures for Searching
+    Objective:
+    Compare Array (O(N)), HashSet (O(1)), and TreeSet (O(log N)) for searching elements.
+    Approach:
+    Array: Linear search (O(N)).
+    HashSet: Uses hashing (O(1) on average).
+    TreeSet: Balanced BST (O(log N)).
+    Comparative Analysis:
+    Dataset Size (N)
+    Array Search (O(N))
+    HashSet Search (O(1))
+    TreeSet Search (O(log N))
+    1,000
+    1ms
+    0.01ms
+    0.1ms
+    100,000
+    100ms
+    0.01ms
+    10ms
+    1,000,000
+    1s
+    0.01ms
+    20ms
+
+    Expected Result:
+    HashSet is fastest for lookups but requires extra memory.
+    TreeSet maintains order but is slightly slower than HashSet.
+    package com.performance.dataStructuresearchcomparison;
+
+    import java.util.*;
+
+    public class DataStructureSearchComparison {
+       public static void main(String[] args) {
+           int[] sizes = {1_000, 100_000, 1_000_000};
+
+           for (int size : sizes) {
+               System.out.println("Dataset Size: " + size);
+
+               // Generate random data
+               Random rand = new Random();
+               int[] array = new int[size];
+               HashSet<Integer> hashSet = new HashSet<>();
+               TreeSet<Integer> treeSet = new TreeSet<>();
+
+               for (int i = 0; i < size; i++) {
+                   int num = rand.nextInt(size * 10);
+                   array[i] = num;
+                   hashSet.add(num);
+                   treeSet.add(num);
+               }
+
+               // Pick a random element to search
+               int searchElement = array[rand.nextInt(size)];
+
+               // Measure time for Array search (O(N))
+               long start = System.nanoTime();
+               boolean foundArray = linearSearch(array, searchElement);
+               long arrayTime = System.nanoTime() - start;
+
+               // Measure time for HashSet search (O(1))
+               start = System.nanoTime();
+               boolean foundHashSet = hashSet.contains(searchElement);
+               long hashSetTime = System.nanoTime() - start;
+
+               // Measure time for TreeSet search (O(log N))
+               start = System.nanoTime();
+               boolean foundTreeSet = treeSet.contains(searchElement);
+               long treeSetTime = System.nanoTime() - start;
+
+               // Print results
+               System.out.printf("Array Search (O(N)): %d ns, Found: %b\n", arrayTime, foundArray);
+               System.out.printf("HashSet Search (O(1)): %d ns, Found: %b\n", hashSetTime, foundHashSet);
+               System.out.printf("TreeSet Search (O(log N)): %d ns, Found: %b\n", treeSetTime, foundTreeSet);
+               System.out.println();
+           }
+       }
+
+       // Linear search for Array
+       private static boolean linearSearch(int[] arr, int key) {
+           for (int num : arr) {
+               if (num == key) return true;
+           }
+           return false;
+       }
+    }
+
+
+
+
+    package com.performancetest.datastructuresearchcomparisontest;
+
+    import static org.junit.jupiter.api.Assertions.*;
+    import org.junit.jupiter.api.BeforeEach;
+    import org.junit.jupiter.api.Test;
+    import java.util.*;
+
+    public class DataStructureSearchComparisonTest {
+       private int[] array;
+       private HashSet<Integer> hashSet;
+       private TreeSet<Integer> treeSet;
+       private int searchElement;
+
+       @BeforeEach
+       void setUp() {
+           int size = 10000; // Test with 10,000 elements
+           Random rand = new Random();
+           array = new int[size];
+           hashSet = new HashSet<>();
+           treeSet = new TreeSet<>();
+
+           // Populate data structures
+           for (int i = 0; i < size; i++) {
+               int num = rand.nextInt(size * 10);
+               array[i] = num;
+               hashSet.add(num);
+               treeSet.add(num);
+           }
+
+           // Pick a random element from the array for testing
+           searchElement = array[rand.nextInt(size)];
+       }
+
+       @Test
+       void testLinearSearch() {
+           assertTrue(linearSearch(array, searchElement), "Element should be found in Array");
+           assertFalse(linearSearch(array, -1), "Non-existent element should not be found in Array");
+       }
+
+       @Test
+       void testHashSetSearch() {
+           assertTrue(hashSet.contains(searchElement), "Element should be found in HashSet");
+           assertFalse(hashSet.contains(-1), "Non-existent element should not be found in HashSet");
+       }
+
+       @Test
+       void testTreeSetSearch() {
+           assertTrue(treeSet.contains(searchElement), "Element should be found in TreeSet");
+           assertFalse(treeSet.contains(-1), "Non-existent element should not be found in TreeSet");
+       }
+
+       // Linear search for Array
+       private boolean linearSearch(int[] arr, int key) {
+           for (int num : arr) {
+               if (num == key) return true;
+           }
+           return false;
+       }
+    }
+
+   }
+       return false;
+   }
+}
+
+ Problem Statement: Large File Reading Efficiency
+                 Objective:
+                 Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+                 Approach:
+                 FileReader: Reads character by character (slower for binary files).
+                 InputStreamReader: Reads bytes and converts to characters (more efficient).
+                 Comparative Analysis:
+                 File Size
+                 FileReader Time
+                 InputStreamReader Time
+                 1MB
+                 50ms
+                 30ms
+                 100MB
+                 3s
+                 1.5s
+                 500MB
+                 10s
+                 5s
+
+                 Expected Result:
+                 InputStreamReader is more efficient for large files.
+                 FileReader is preferable for text-based data.
+Best Practices for Runtime Analysis & Big O Notation
+When designing algorithms, follow these best practices to ensure optimal time and space complexity.
+🟢 General Algorithm Best Practices
+Choose the right data structure
+Use HashMap for O(1) lookups instead of ArrayList (O(N)).
+Use TreeSet for ordered data retrieval with O(log N) complexity.
+Optimize loops & conditions
+Avoid unnecessary nested loops (O(N²) or worse).
+Use break/return early to reduce iterations.
+Use sorting efficiently
+Prefer Merge Sort (O(N log N)) over Bubble Sort (O(N²)).
+If frequent sorting is needed, consider TreeMap (O(log N) per operation).
+Avoid excessive recursion
+Recursive Fibonacci (O(2ⁿ)) is inefficient; use Memoization (O(N)).
+Use Tail Recursion when applicable.
+Reduce redundant computations
+Store results of expensive operations using caching/memoization.
+Example: Use Dynamic Programming to avoid recomputation.
+🔵 Time & Space Complexity Optimization
+Precompute values when possible
+If computing the same value multiple times, store it in a lookup table.
+Use efficient searching methods
+Instead of Linear Search (O(N)), use Binary Search (O(log N)) for sorted data.
+Use efficient iteration techniques
+Instead of for (int i = 0; i < list.size(); i++), use for-each loops.
+Example: for (String s : list)
+Optimize memory usage
+Use StringBuilder instead of String for concatenation.
+Use primitive types (int, double) over wrapper classes (Integer, Double) when possible.
+Profile & benchmark performance
+Use Java’s System.nanoTime() or JMH (Java Microbenchmark Harness) to measure execution time.
+
+1. Problem Statement: Search a Target in a Large Dataset
+Objective:
+Compare the performance of Linear Search (O(N)) and Binary Search (O(log N)) on different dataset sizes.
+Approach:
+Linear Search: Scan each element until the target is found.
+Binary Search: Sort the data first (O(N log N)), then perform O(log N) search.
+Comparative Analysis:
+Dataset Size (N)
+Linear Search (O(N))
+Binary Search (O(log N))
+1,000
+1ms
+0.01ms
+10,000
+10ms
+0.02ms
+1,000,000
+1s
+0.1ms
+
+Expected Result:
+Binary Search performs much better for large datasets, provided data is sorted.
+package com.performance.searchtarget;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SearchTarget {
+
+   // Linear Search Implementation
+   public static int linearSearch(int[] arr, int target) {
+       for (int i = 0; i < arr.length; i++) {
+           if (arr[i] == target) {
+               return i; // Return index if found
+           }
+       }
+       return -1; // Return -1 if not found
+   }
+
+   // Binary Search Implementation
+   public static int binarySearch(int[] arr, int target) {
+       int left = 0, right = arr.length - 1;
+       while (left <= right) {
+           int mid = left + (right - left) / 2;
+           if (arr[mid] == target)
+               return mid;
+           if (arr[mid] < target)
+               left = mid + 1;
+           else
+               right = mid - 1;
+       }
+       return -1;
+   }
+
+   public static void runSearchTest(int N) {
+       int[] dataset = new int[N];
+       Random random = new Random();
+
+       // Fill the dataset with random numbers
+       for (int i = 0; i < N; i++) {
+           dataset[i] = random.nextInt(N);
+       }
+
+       int target = dataset[random.nextInt(N)]; // Random target from dataset
+
+       // Measure Linear Search time
+       long startTime = System.nanoTime();
+       int linearResult = linearSearch(dataset, target);
+       long endTime = System.nanoTime();
+       double linearTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Sort the array for Binary Search
+       Arrays.sort(dataset);
+
+       // Measure Binary Search time
+       startTime = System.nanoTime();
+       int binaryResult = binarySearch(dataset, target);
+       endTime = System.nanoTime();
+       double binaryTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Print results
+       System.out.println("Dataset Size: " + N);
+       System.out.println("Linear Search Time: " + linearTime + " ms");
+       System.out.println("Binary Search Time: " + binaryTime + " ms");
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] datasetSizes = {1000, 10000, 1000000};
+
+       for (int N : datasetSizes) {
+           runSearchTest(N);
+       }
+   }
+}
+
+
+package com.performancetest.searchtargettest;
+
+import com.performance.searchtarget.SearchTarget;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class SearchTargetTest {
+
+   @Test
+   void testLinearSearch_Found() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(2, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_NotFound() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 7));
+   }
+
+   @Test
+   void testBinarySearch_Found() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(3, SearchTarget.binarySearch(arr, 8));
+   }
+
+   @Test
+   void testBinarySearch_NotFound() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 2));
+   }
+
+   @Test
+   void testBinarySearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementFound() {
+       int[] arr = {10};
+       assertEquals(0, SearchTarget.binarySearch(arr, 10));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementNotFound() {
+       int[] arr = {10};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       Arrays.sort(arr);
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.binarySearch(arr, target) >= 0);
+   }
+
+   @Test
+   void testLinearSearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.linearSearch(arr, target) >= 0);
+   }
+}
+
+
+
+
+
+2. Problem Statement: Sorting Large Data Efficiently
+Objective:
+Compare sorting algorithms Bubble Sort (O(N²)), Merge Sort (O(N log N)), and Quick Sort (O(N log N)).
+Approach:
+Bubble Sort: Repeated swapping (inefficient for large data).
+Merge Sort: Divide & Conquer approach (stable).
+Quick Sort: Partition-based approach (fast but unstable).
+Comparative Analysis:
+Dataset Size (N)
+Bubble Sort (O(N²))
+Merge Sort (O(N log N))
+Quick Sort (O(N log N))
+1,000
+50ms
+5ms
+3ms
+10,000
+5s
+50ms
+30ms
+1,000,000
+Unfeasible (>1hr)
+3s
+2s
+
+Expected Result:
+Bubble Sort is impractical for large datasets.
+Merge Sort & Quick Sort perform well.
+package com.performance.sortingcomparison;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1000, 10000, 1000000};
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+           int[] data = generateRandomArray(size);
+
+           // Measure Bubble Sort (Skipped for large N due to inefficiency)
+           if (size <= 10000) {
+               int[] bubbleData = Arrays.copyOf(data, data.length);
+               long start = System.currentTimeMillis();
+               bubbleSort(bubbleData);
+               long end = System.currentTimeMillis();
+               System.out.println("Bubble Sort: " + (end - start) + " ms");
+           } else {
+               System.out.println("Bubble Sort: Unfeasible");
+           }
+
+           // Measure Merge Sort
+           int[] mergeData = Arrays.copyOf(data, data.length);
+           long start = System.currentTimeMillis();
+           mergeSort(mergeData);
+           long end = System.currentTimeMillis();
+           System.out.println("Merge Sort: " + (end - start) + " ms");
+
+           // Measure Quick Sort
+           int[] quickData = Arrays.copyOf(data, data.length);
+           start = System.currentTimeMillis();
+           quickSort(quickData, 0, quickData.length - 1);
+           end = System.currentTimeMillis();
+           System.out.println("Quick Sort: " + (end - start) + " ms");
+
+           System.out.println("--------------------------");
+       }
+   }
+
+   public static int[] generateRandomArray(int size) {
+       Random random = new Random();
+       int[] array = new int[size];
+       for (int i = 0; i < size; i++) {
+           array[i] = random.nextInt(1000000); // Random numbers up to 1 million
+       }
+       return array;
+   }
+
+   public static void bubbleSort(int[] arr) {
+       int n = arr.length;
+       for (int i = 0; i < n - 1; i++) {
+           for (int j = 0; j < n - i - 1; j++) {
+               if (arr[j] > arr[j + 1]) {
+                   int temp = arr[j];
+                   arr[j] = arr[j + 1];
+                   arr[j + 1] = temp;
+               }
+           }
+       }
+   }
+
+   public static void mergeSort(int[] arr) {
+       if (arr.length < 2) return;
+       int mid = arr.length / 2;
+       int[] left = Arrays.copyOfRange(arr, 0, mid);
+       int[] right = Arrays.copyOfRange(arr, mid, arr.length);
+
+       mergeSort(left);
+       mergeSort(right);
+       merge(arr, left, right);
+   }
+
+   public static void merge(int[] arr, int[] left, int[] right) {
+       int i = 0, j = 0, k = 0;
+       while (i < left.length && j < right.length) {
+           if (left[i] <= right[j]) {
+               arr[k++] = left[i++];
+           } else {
+               arr[k++] = right[j++];
+           }
+       }
+       while (i < left.length) arr[k++] = left[i++];
+       while (j < right.length) arr[k++] = right[j++];
+   }
+
+   public static void quickSort(int[] arr, int low, int high) {
+       if (low < high) {
+           int pi = partition(arr, low, high);
+           quickSort(arr, low, pi - 1);
+           quickSort(arr, pi + 1, high);
+       }
+   }
+
+   public static int partition(int[] arr, int low, int high) {
+       int pivot = arr[high];
+       int i = (low - 1);
+       for (int j = low; j < high; j++) {
+           if (arr[j] < pivot) {
+               i++;
+               int temp = arr[i];
+               arr[i] = arr[j];
+               arr[j] = temp;
+           }
+       }
+       int temp = arr[i + 1];
+       arr[i + 1] = arr[high];
+       arr[high] = temp;
+       return i + 1;
+   }
+}
+
+
+package com.performancetest.sortingcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.performance.sortingcomparison.SortingComparison;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparisonTest {
+   private int[] unsortedArray;
+   private int[] sortedArray;
+
+   @BeforeEach
+   void setUp() {
+       // Generate a random array for testing
+       unsortedArray = SortingComparison.generateRandomArray(1000); // Use 1000 elements for testing
+       sortedArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       Arrays.sort(sortedArray); // Sort using Java's built-in sort for comparison
+   }
+
+   @Test
+   void testBubbleSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.bubbleSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Bubble Sort failed!");
+   }
+
+   @Test
+   void testMergeSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.mergeSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Merge Sort failed!");
+   }
+
+   @Test
+   void testQuickSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.quickSort(testArray, 0, testArray.length - 1);
+       assertArrayEquals(sortedArray, testArray, "Quick Sort failed!");
+   }
+
+   @Test
+   void testSortingEmptyArray() {
+       int[] emptyArray = {};
+       SortingComparison.bubbleSort(emptyArray);
+       SortingComparison.mergeSort(emptyArray);
+       SortingComparison.quickSort(emptyArray, 0, 0);
+       assertArrayEquals(new int[]{}, emptyArray, "Sorting empty array should work!");
+   }
+
+   @Test
+   void testSortingSingleElementArray() {
+       int[] singleElementArray = {42};
+       SortingComparison.bubbleSort(singleElementArray);
+       SortingComparison.mergeSort(singleElementArray);
+       SortingComparison.quickSort(singleElementArray, 0, 0);
+       assertArrayEquals(new int[]{42}, singleElementArray, "Sorting single-element array should work!");
+   }
+
+   @Test
+   void testSortingAlreadySortedArray() {
+       int[] alreadySortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       SortingComparison.bubbleSort(alreadySortedArray);
+       SortingComparison.mergeSort(alreadySortedArray);
+       SortingComparison.quickSort(alreadySortedArray, 0, alreadySortedArray.length - 1);
+       assertArrayEquals(sortedArray, alreadySortedArray, "Sorting an already sorted array should not change it!");
+   }
+
+   @Test
+   void testSortingReverseSortedArray() {
+       int[] reverseSortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       for (int i = 0, j = reverseSortedArray.length - 1; i < j; i++, j--) {
+           int temp = reverseSortedArray[i];
+           reverseSortedArray[i] = reverseSortedArray[j];
+           reverseSortedArray[j] = temp;
+       }
+       SortingComparison.bubbleSort(reverseSortedArray);
+       SortingComparison.mergeSort(reverseSortedArray);
+       SortingComparison.quickSort(reverseSortedArray, 0, reverseSortedArray.length - 1);
+       assertArrayEquals(sortedArray, reverseSortedArray, "Sorting reverse sorted array should work!");
+   }
+}
+
+
+
+
+
+3. Problem Statement: String Concatenation Performance
+Objective:
+Compare the performance of String (O(N²)), StringBuilder (O(N)), and StringBuffer (O(N)) when concatenating a million strings.
+Approach:
+Using String (Immutable, creates new object each time)
+Using StringBuilder (Fast, mutable, thread-unsafe)
+Using StringBuffer (Thread-safe, slightly slower than StringBuilder)
+Comparative Analysis:
+Operations Count (N)
+String (O(N²))
+StringBuilder (O(N))
+StringBuffer (O(N))
+1,000
+10ms
+1ms
+2ms
+10,000
+1s
+10ms
+12ms
+1,000,000
+30m (Unusable)
+50ms
+60ms
+
+Expected Result:
+StringBuilder & StringBuffer are much more efficient than String.
+Use StringBuilder for single-threaded operations and StringBuffer for multi-threaded.
+package com.performance.stringconcatenationperformance;
+
+public class StringConcatenationPerformance {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 10_000, 1_000_000};
+
+       for (int N : sizes) {
+           System.out.println("Dataset Size: " + N);
+
+           // Using String
+           long startTime = System.currentTimeMillis();
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           long endTime = System.currentTimeMillis();
+           System.out.println("Time taken with String: " + (endTime - startTime) + "ms");
+
+           // Using StringBuilder
+           startTime = System.currentTimeMillis();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuilder: " + (endTime - startTime) + "ms");
+
+           // Using StringBuffer
+           startTime = System.currentTimeMillis();
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuffer: " + (endTime - startTime) + "ms");
+
+           System.out.println();
+       }
+   }
+}
+
+
+package com.performancetest.stringconcatenationperformance;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StringConcatenationPerformanceTest {
+
+   @Test
+   void testStringConcatenation() {
+       int N = 1000;
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       assertEquals(N, str.length());
+   }
+
+   @Test
+   void testStringBuilderConcatenation() {
+       int N = 1000;
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       assertEquals(N, sb.length());
+   }
+
+   @Test
+   void testStringBufferConcatenation() {
+       int N = 1000;
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       assertEquals(N, sbf.length());
+   }
+
+   @Test
+   void testPerformanceStringBuilderVsString() {
+       int N = 10000;
+
+       // Measure time for String concatenation
+       long startTime = System.nanoTime();
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       long stringTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuilder
+       startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // StringBuilder should be significantly faster
+       assertTrue(builderTime < stringTime);
+   }
+
+   @Test
+   void testPerformanceStringBufferVsStringBuilder() {
+       int N = 10000;
+
+       // Measure time for StringBuilder
+       long startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuffer
+       startTime = System.nanoTime();
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       long bufferTime = System.nanoTime() - startTime;
+
+       // StringBuffer should be slightly slower than StringBuilder (due to synchronization)
+       assertTrue(builderTime <= bufferTime);
+   }
+}
+
+
+
+
+
+4. Problem Statement: Large File Reading Efficiency
+Objective:
+Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+Approach:
+FileReader: Reads character by character (slower for binary files).
+InputStreamReader: Reads bytes and converts to characters (more efficient).
+Comparative Analysis:
+File Size
+FileReader Time
+InputStreamReader Time
+1MB
+50ms
+30ms
+100MB
+3s
+1.5s
+500MB
+10s
+5s
+
+Expected Result:
+InputStreamReader is more efficient for large files.
+FileReader is preferable for text-based data.
+
+5. Problem Statement: Recursive vs Iterative Fibonacci Computation
+Objective:
+Compare Recursive (O(2ⁿ)) vs Iterative (O(N)) Fibonacci solutions.
+Approach:
+Recursive:
+public static int fibonacciRecursive(int n) {
+    if (n <= 1) return n;
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+Iterative:
+public static int fibonacciIterative(int n) {
+    int a = 0, b = 1, sum;
+    for (int i = 2; i <= n; i++) {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+    return b;
+}
+Comparative Analysis:
+Fibonacci (N)
+Recursive (O(2ⁿ))
+Iterative (O(N))
+10
+1ms
+0.01ms
+30
+5s
+0.05ms
+50
+Unfeasible (>1hr)
+0.1ms
+
+Expected Result:
+Recursive approach is infeasible for large values of N due to exponential growth.
+The iterative approach is significantly faster and memory-efficient.
+package com.performance.fibonaccicomputation;
+
+public class FibonacciComputation{
+
+   // Recursive Fibonacci (Exponential Time Complexity: O(2^N))
+   public static int fibonacciRecursive(int n) {
+       if (n <= 1) return n;
+       return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+   }
+
+   // Iterative Fibonacci (Linear Time Complexity: O(N))
+   public static int fibonacciIterative(int n) {
+       if (n <= 1)
+           return n;
+       int a = 0, b = 1, sum;
+       for (int i = 2; i <= n; i++) {
+           sum = a + b;
+           a = b;
+           b = sum;
+       }
+       return b;
+   }
+
+   public static void runPerformanceTest(int N) {
+       System.out.println("Fibonacci Computation for N = " + N);
+
+       // Measure Recursive Execution Time
+       long startTime = System.nanoTime();
+       int recursiveResult = fibonacciRecursive(N);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci Result: " + recursiveResult);
+       System.out.println("Time taken (Recursive): " + recursiveTime + " ms");
+
+       // Measure Iterative Execution Time
+       startTime = System.nanoTime();
+       int iterativeResult = fibonacciIterative(N);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci Result: " + iterativeResult);
+       System.out.println("Time taken (Iterative): " + iterativeTime + " ms");
+
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] testCases = {10, 30, 50};
+
+       for (int N : testCases) {
+           if (N <= 30) { // Avoid recursive inefficiency for large values
+               runPerformanceTest(N);
+           } else {
+               System.out.println("Skipping Recursive Fibonacci for N = " + N + " (Too Slow)");
+               System.out.println("Fibonacci Iterative Result: " + fibonacciIterative(N));
+               System.out.println();
+           }
+       }
+   }
+}
+
+
+package com.performancetest.fibonaccicomputationtest;
+
+
+
+import com.performance.fibonaccicomputation.FibonacciComputation;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class FibonacciComputationTest {
+
+   @Test
+   void testFibonacciRecursive() {
+       assertEquals(0, FibonacciComputation.fibonacciRecursive(0));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(1));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(2));
+       assertEquals(2, FibonacciComputation.fibonacciRecursive(3));
+       assertEquals(3, FibonacciComputation.fibonacciRecursive(4));
+       assertEquals(5, FibonacciComputation.fibonacciRecursive(5));
+       assertEquals(55, FibonacciComputation.fibonacciRecursive(10));
+       assertEquals(832040, FibonacciComputation.fibonacciRecursive(30));
+   }
+
+   @Test
+   void testFibonacciIterative() {
+       assertEquals(0, FibonacciComputation.fibonacciIterative(0));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(1));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(2));
+       assertEquals(2, FibonacciComputation.fibonacciIterative(3));
+       assertEquals(3, FibonacciComputation.fibonacciIterative(4));
+       assertEquals(5, FibonacciComputation.fibonacciIterative(5));
+       assertEquals(55, FibonacciComputation.fibonacciIterative(10));
+       assertEquals(832040, FibonacciComputation.fibonacciIterative(30));
+   }
+
+   @Test
+   void testPerformance() {
+       int n = 30; // Reasonable limit for recursive
+       long startTime = System.nanoTime();
+       FibonacciComputation.fibonacciRecursive(n);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci for N = " + n + " took: " + recursiveTime + " ms");
+
+       n = 50; // Reasonable limit for iterative
+       startTime = System.nanoTime();
+       FibonacciComputation.fibonacciIterative(n);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci for N = " + n + " took: " + iterativeTime + " ms");
+   }
+}
+
+
+
+6. Problem Statement: Comparing Different Data Structures for Searching
+Objective:
+Compare Array (O(N)), HashSet (O(1)), and TreeSet (O(log N)) for searching elements.
+Approach:
+Array: Linear search (O(N)).
+HashSet: Uses hashing (O(1) on average).
+TreeSet: Balanced BST (O(log N)).
+Comparative Analysis:
+Dataset Size (N)
+Array Search (O(N))
+HashSet Search (O(1))
+TreeSet Search (O(log N))
+1,000
+1ms
+0.01ms
+0.1ms
+100,000
+100ms
+0.01ms
+10ms
+1,000,000
+1s
+0.01ms
+20ms
+
+Expected Result:
+HashSet is fastest for lookups but requires extra memory.
+TreeSet maintains order but is slightly slower than HashSet.
+package com.performance.dataStructuresearchcomparison;
+
+import java.util.*;
+
+public class DataStructureSearchComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 100_000, 1_000_000};
+
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+
+           // Generate random data
+           Random rand = new Random();
+           int[] array = new int[size];
+           HashSet<Integer> hashSet = new HashSet<>();
+           TreeSet<Integer> treeSet = new TreeSet<>();
+
+           for (int i = 0; i < size; i++) {
+               int num = rand.nextInt(size * 10);
+               array[i] = num;
+               hashSet.add(num);
+               treeSet.add(num);
+           }
+
+           // Pick a random element to search
+           int searchElement = array[rand.nextInt(size)];
+
+           // Measure time for Array search (O(N))
+           long start = System.nanoTime();
+           boolean foundArray = linearSearch(array, searchElement);
+           long arrayTime = System.nanoTime() - start;
+
+           // Measure time for HashSet search (O(1))
+           start = System.nanoTime();
+           boolean foundHashSet = hashSet.contains(searchElement);
+           long hashSetTime = System.nanoTime() - start;
+
+           // Measure time for TreeSet search (O(log N))
+           start = System.nanoTime();
+           boolean foundTreeSet = treeSet.contains(searchElement);
+           long treeSetTime = System.nanoTime() - start;
+
+           // Print results
+           System.out.printf("Array Search (O(N)): %d ns, Found: %b\n", arrayTime, foundArray);
+           System.out.printf("HashSet Search (O(1)): %d ns, Found: %b\n", hashSetTime, foundHashSet);
+           System.out.printf("TreeSet Search (O(log N)): %d ns, Found: %b\n", treeSetTime, foundTreeSet);
+           System.out.println();
+       }
+   }
+
+   // Linear search for Array
+   private static boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+
+
+
+package com.performancetest.datastructuresearchcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.*;
+
+public class DataStructureSearchComparisonTest {
+   private int[] array;
+   private HashSet<Integer> hashSet;
+   private TreeSet<Integer> treeSet;
+   private int searchElement;
+
+   @BeforeEach
+   void setUp() {
+       int size = 10000; // Test with 10,000 elements
+       Random rand = new Random();
+       array = new int[size];
+       hashSet = new HashSet<>();
+       treeSet = new TreeSet<>();
+
+       // Populate data structures
+       for (int i = 0; i < size; i++) {
+           int num = rand.nextInt(size * 10);
+           array[i] = num;
+           hashSet.add(num);
+           treeSet.add(num);
+       }
+
+       // Pick a random element from the array for testing
+       searchElement = array[rand.nextInt(size)];
+   }
+
+   @Test
+   void testLinearSearch() {
+       assertTrue(linearSearch(array, searchElement), "Element should be found in Array");
+       assertFalse(linearSearch(array, -1), "Non-existent element should not be found in Array");
+   }
+
+   @Test
+   void testHashSetSearch() {
+       assertTrue(hashSet.contains(searchElement), "Element should be found in HashSet");
+       assertFalse(hashSet.contains(-1), "Non-existent element should not be found in HashSet");
+   }
+
+   @Test
+   void testTreeSetSearch() {
+       assertTrue(treeSet.contains(searchElement), "Element should be found in TreeSet");
+       assertFalse(treeSet.contains(-1), "Non-existent element should not be found in TreeSet");
+   }
+
+   // Linear search for Array
+   private boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+ Problem Statement: Large File Reading Efficiency
+                 Objective:
+                 Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+                 Approach:
+                 FileReader: Reads character by character (slower for binary files).
+                 InputStreamReader: Reads bytes and converts to characters (more efficient).
+                 Comparative Analysis:
+                 File Size
+                 FileReader Time
+                 InputStreamReader Time
+                 1MB
+                 50ms
+                 30ms
+                 100MB
+                 3s
+                 1.5s
+                 500MB
+                 10s
+                 5s
+
+                 Expected Result:
+                 InputStreamReader is more efficient for large files.
+                 FileReader is preferable for text-based data.
+Best Practices for Runtime Analysis & Big O Notation
+When designing algorithms, follow these best practices to ensure optimal time and space complexity.
+🟢 General Algorithm Best Practices
+Choose the right data structure
+Use HashMap for O(1) lookups instead of ArrayList (O(N)).
+Use TreeSet for ordered data retrieval with O(log N) complexity.
+Optimize loops & conditions
+Avoid unnecessary nested loops (O(N²) or worse).
+Use break/return early to reduce iterations.
+Use sorting efficiently
+Prefer Merge Sort (O(N log N)) over Bubble Sort (O(N²)).
+If frequent sorting is needed, consider TreeMap (O(log N) per operation).
+Avoid excessive recursion
+Recursive Fibonacci (O(2ⁿ)) is inefficient; use Memoization (O(N)).
+Use Tail Recursion when applicable.
+Reduce redundant computations
+Store results of expensive operations using caching/memoization.
+Example: Use Dynamic Programming to avoid recomputation.
+🔵 Time & Space Complexity Optimization
+Precompute values when possible
+If computing the same value multiple times, store it in a lookup table.
+Use efficient searching methods
+Instead of Linear Search (O(N)), use Binary Search (O(log N)) for sorted data.
+Use efficient iteration techniques
+Instead of for (int i = 0; i < list.size(); i++), use for-each loops.
+Example: for (String s : list)
+Optimize memory usage
+Use StringBuilder instead of String for concatenation.
+Use primitive types (int, double) over wrapper classes (Integer, Double) when possible.
+Profile & benchmark performance
+Use Java’s System.nanoTime() or JMH (Java Microbenchmark Harness) to measure execution time.
+
+1. Problem Statement: Search a Target in a Large Dataset
+Objective:
+Compare the performance of Linear Search (O(N)) and Binary Search (O(log N)) on different dataset sizes.
+Approach:
+Linear Search: Scan each element until the target is found.
+Binary Search: Sort the data first (O(N log N)), then perform O(log N) search.
+Comparative Analysis:
+Dataset Size (N)
+Linear Search (O(N))
+Binary Search (O(log N))
+1,000
+1ms
+0.01ms
+10,000
+10ms
+0.02ms
+1,000,000
+1s
+0.1ms
+
+Expected Result:
+Binary Search performs much better for large datasets, provided data is sorted.
+package com.performance.searchtarget;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SearchTarget {
+
+   // Linear Search Implementation
+   public static int linearSearch(int[] arr, int target) {
+       for (int i = 0; i < arr.length; i++) {
+           if (arr[i] == target) {
+               return i; // Return index if found
+           }
+       }
+       return -1; // Return -1 if not found
+   }
+
+   // Binary Search Implementation
+   public static int binarySearch(int[] arr, int target) {
+       int left = 0, right = arr.length - 1;
+       while (left <= right) {
+           int mid = left + (right - left) / 2;
+           if (arr[mid] == target)
+               return mid;
+           if (arr[mid] < target)
+               left = mid + 1;
+           else
+               right = mid - 1;
+       }
+       return -1;
+   }
+
+   public static void runSearchTest(int N) {
+       int[] dataset = new int[N];
+       Random random = new Random();
+
+       // Fill the dataset with random numbers
+       for (int i = 0; i < N; i++) {
+           dataset[i] = random.nextInt(N);
+       }
+
+       int target = dataset[random.nextInt(N)]; // Random target from dataset
+
+       // Measure Linear Search time
+       long startTime = System.nanoTime();
+       int linearResult = linearSearch(dataset, target);
+       long endTime = System.nanoTime();
+       double linearTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Sort the array for Binary Search
+       Arrays.sort(dataset);
+
+       // Measure Binary Search time
+       startTime = System.nanoTime();
+       int binaryResult = binarySearch(dataset, target);
+       endTime = System.nanoTime();
+       double binaryTime = (endTime - startTime) / 1000000; // Convert to milliseconds
+
+       // Print results
+       System.out.println("Dataset Size: " + N);
+       System.out.println("Linear Search Time: " + linearTime + " ms");
+       System.out.println("Binary Search Time: " + binaryTime + " ms");
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] datasetSizes = {1000, 10000, 1000000};
+
+       for (int N : datasetSizes) {
+           runSearchTest(N);
+       }
+   }
+}
+
+
+package com.performancetest.searchtargettest;
+
+import com.performance.searchtarget.SearchTarget;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class SearchTargetTest {
+
+   @Test
+   void testLinearSearch_Found() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(2, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_NotFound() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 7));
+   }
+
+   @Test
+   void testBinarySearch_Found() {
+       int[] arr = {2, 4, 6, 8, 10};
+       assertEquals(3, SearchTarget.binarySearch(arr, 8));
+   }
+
+   @Test
+   void testBinarySearch_NotFound() {
+       int[] arr = {1, 3, 5, 7, 9};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 2));
+   }
+
+   @Test
+   void testBinarySearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testLinearSearch_EmptyArray() {
+       int[] arr = {};
+       assertEquals(-1, SearchTarget.linearSearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementFound() {
+       int[] arr = {10};
+       assertEquals(0, SearchTarget.binarySearch(arr, 10));
+   }
+
+   @Test
+   void testBinarySearch_SingleElementNotFound() {
+       int[] arr = {10};
+       assertEquals(-1, SearchTarget.binarySearch(arr, 5));
+   }
+
+   @Test
+   void testBinarySearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       Arrays.sort(arr);
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.binarySearch(arr, target) >= 0);
+   }
+
+   @Test
+   void testLinearSearch_RandomArray() {
+       int[] arr = new Random().ints(100, 1, 1000).toArray();
+       int target = arr[arr.length / 2]; // Pick a middle element
+       assertTrue(SearchTarget.linearSearch(arr, target) >= 0);
+   }
+}
+
+
+
+
+
+2. Problem Statement: Sorting Large Data Efficiently
+Objective:
+Compare sorting algorithms Bubble Sort (O(N²)), Merge Sort (O(N log N)), and Quick Sort (O(N log N)).
+Approach:
+Bubble Sort: Repeated swapping (inefficient for large data).
+Merge Sort: Divide & Conquer approach (stable).
+Quick Sort: Partition-based approach (fast but unstable).
+Comparative Analysis:
+Dataset Size (N)
+Bubble Sort (O(N²))
+Merge Sort (O(N log N))
+Quick Sort (O(N log N))
+1,000
+50ms
+5ms
+3ms
+10,000
+5s
+50ms
+30ms
+1,000,000
+Unfeasible (>1hr)
+3s
+2s
+
+Expected Result:
+Bubble Sort is impractical for large datasets.
+Merge Sort & Quick Sort perform well.
+package com.performance.sortingcomparison;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1000, 10000, 1000000};
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+           int[] data = generateRandomArray(size);
+
+           // Measure Bubble Sort (Skipped for large N due to inefficiency)
+           if (size <= 10000) {
+               int[] bubbleData = Arrays.copyOf(data, data.length);
+               long start = System.currentTimeMillis();
+               bubbleSort(bubbleData);
+               long end = System.currentTimeMillis();
+               System.out.println("Bubble Sort: " + (end - start) + " ms");
+           } else {
+               System.out.println("Bubble Sort: Unfeasible");
+           }
+
+           // Measure Merge Sort
+           int[] mergeData = Arrays.copyOf(data, data.length);
+           long start = System.currentTimeMillis();
+           mergeSort(mergeData);
+           long end = System.currentTimeMillis();
+           System.out.println("Merge Sort: " + (end - start) + " ms");
+
+           // Measure Quick Sort
+           int[] quickData = Arrays.copyOf(data, data.length);
+           start = System.currentTimeMillis();
+           quickSort(quickData, 0, quickData.length - 1);
+           end = System.currentTimeMillis();
+           System.out.println("Quick Sort: " + (end - start) + " ms");
+
+           System.out.println("--------------------------");
+       }
+   }
+
+   public static int[] generateRandomArray(int size) {
+       Random random = new Random();
+       int[] array = new int[size];
+       for (int i = 0; i < size; i++) {
+           array[i] = random.nextInt(1000000); // Random numbers up to 1 million
+       }
+       return array;
+   }
+
+   public static void bubbleSort(int[] arr) {
+       int n = arr.length;
+       for (int i = 0; i < n - 1; i++) {
+           for (int j = 0; j < n - i - 1; j++) {
+               if (arr[j] > arr[j + 1]) {
+                   int temp = arr[j];
+                   arr[j] = arr[j + 1];
+                   arr[j + 1] = temp;
+               }
+           }
+       }
+   }
+
+   public static void mergeSort(int[] arr) {
+       if (arr.length < 2) return;
+       int mid = arr.length / 2;
+       int[] left = Arrays.copyOfRange(arr, 0, mid);
+       int[] right = Arrays.copyOfRange(arr, mid, arr.length);
+
+       mergeSort(left);
+       mergeSort(right);
+       merge(arr, left, right);
+   }
+
+   public static void merge(int[] arr, int[] left, int[] right) {
+       int i = 0, j = 0, k = 0;
+       while (i < left.length && j < right.length) {
+           if (left[i] <= right[j]) {
+               arr[k++] = left[i++];
+           } else {
+               arr[k++] = right[j++];
+           }
+       }
+       while (i < left.length) arr[k++] = left[i++];
+       while (j < right.length) arr[k++] = right[j++];
+   }
+
+   public static void quickSort(int[] arr, int low, int high) {
+       if (low < high) {
+           int pi = partition(arr, low, high);
+           quickSort(arr, low, pi - 1);
+           quickSort(arr, pi + 1, high);
+       }
+   }
+
+   public static int partition(int[] arr, int low, int high) {
+       int pivot = arr[high];
+       int i = (low - 1);
+       for (int j = low; j < high; j++) {
+           if (arr[j] < pivot) {
+               i++;
+               int temp = arr[i];
+               arr[i] = arr[j];
+               arr[j] = temp;
+           }
+       }
+       int temp = arr[i + 1];
+       arr[i + 1] = arr[high];
+       arr[high] = temp;
+       return i + 1;
+   }
+}
+
+
+package com.performancetest.sortingcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.performance.sortingcomparison.SortingComparison;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.Random;
+
+public class SortingComparisonTest {
+   private int[] unsortedArray;
+   private int[] sortedArray;
+
+   @BeforeEach
+   void setUp() {
+       // Generate a random array for testing
+       unsortedArray = SortingComparison.generateRandomArray(1000); // Use 1000 elements for testing
+       sortedArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       Arrays.sort(sortedArray); // Sort using Java's built-in sort for comparison
+   }
+
+   @Test
+   void testBubbleSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.bubbleSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Bubble Sort failed!");
+   }
+
+   @Test
+   void testMergeSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.mergeSort(testArray);
+       assertArrayEquals(sortedArray, testArray, "Merge Sort failed!");
+   }
+
+   @Test
+   void testQuickSort() {
+       int[] testArray = Arrays.copyOf(unsortedArray, unsortedArray.length);
+       SortingComparison.quickSort(testArray, 0, testArray.length - 1);
+       assertArrayEquals(sortedArray, testArray, "Quick Sort failed!");
+   }
+
+   @Test
+   void testSortingEmptyArray() {
+       int[] emptyArray = {};
+       SortingComparison.bubbleSort(emptyArray);
+       SortingComparison.mergeSort(emptyArray);
+       SortingComparison.quickSort(emptyArray, 0, 0);
+       assertArrayEquals(new int[]{}, emptyArray, "Sorting empty array should work!");
+   }
+
+   @Test
+   void testSortingSingleElementArray() {
+       int[] singleElementArray = {42};
+       SortingComparison.bubbleSort(singleElementArray);
+       SortingComparison.mergeSort(singleElementArray);
+       SortingComparison.quickSort(singleElementArray, 0, 0);
+       assertArrayEquals(new int[]{42}, singleElementArray, "Sorting single-element array should work!");
+   }
+
+   @Test
+   void testSortingAlreadySortedArray() {
+       int[] alreadySortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       SortingComparison.bubbleSort(alreadySortedArray);
+       SortingComparison.mergeSort(alreadySortedArray);
+       SortingComparison.quickSort(alreadySortedArray, 0, alreadySortedArray.length - 1);
+       assertArrayEquals(sortedArray, alreadySortedArray, "Sorting an already sorted array should not change it!");
+   }
+
+   @Test
+   void testSortingReverseSortedArray() {
+       int[] reverseSortedArray = Arrays.copyOf(sortedArray, sortedArray.length);
+       for (int i = 0, j = reverseSortedArray.length - 1; i < j; i++, j--) {
+           int temp = reverseSortedArray[i];
+           reverseSortedArray[i] = reverseSortedArray[j];
+           reverseSortedArray[j] = temp;
+       }
+       SortingComparison.bubbleSort(reverseSortedArray);
+       SortingComparison.mergeSort(reverseSortedArray);
+       SortingComparison.quickSort(reverseSortedArray, 0, reverseSortedArray.length - 1);
+       assertArrayEquals(sortedArray, reverseSortedArray, "Sorting reverse sorted array should work!");
+   }
+}
+
+
+
+
+
+3. Problem Statement: String Concatenation Performance
+Objective:
+Compare the performance of String (O(N²)), StringBuilder (O(N)), and StringBuffer (O(N)) when concatenating a million strings.
+Approach:
+Using String (Immutable, creates new object each time)
+Using StringBuilder (Fast, mutable, thread-unsafe)
+Using StringBuffer (Thread-safe, slightly slower than StringBuilder)
+Comparative Analysis:
+Operations Count (N)
+String (O(N²))
+StringBuilder (O(N))
+StringBuffer (O(N))
+1,000
+10ms
+1ms
+2ms
+10,000
+1s
+10ms
+12ms
+1,000,000
+30m (Unusable)
+50ms
+60ms
+
+Expected Result:
+StringBuilder & StringBuffer are much more efficient than String.
+Use StringBuilder for single-threaded operations and StringBuffer for multi-threaded.
+package com.performance.stringconcatenationperformance;
+
+public class StringConcatenationPerformance {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 10_000, 1_000_000};
+
+       for (int N : sizes) {
+           System.out.println("Dataset Size: " + N);
+
+           // Using String
+           long startTime = System.currentTimeMillis();
+           String str = "";
+           for (int i = 0; i < N; i++) {
+               str += "a"; // Inefficient
+           }
+           long endTime = System.currentTimeMillis();
+           System.out.println("Time taken with String: " + (endTime - startTime) + "ms");
+
+           // Using StringBuilder
+           startTime = System.currentTimeMillis();
+           StringBuilder sb = new StringBuilder();
+           for (int i = 0; i < N; i++) {
+               sb.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuilder: " + (endTime - startTime) + "ms");
+
+           // Using StringBuffer
+           startTime = System.currentTimeMillis();
+           StringBuffer sbf = new StringBuffer();
+           for (int i = 0; i < N; i++) {
+               sbf.append("a");
+           }
+           endTime = System.currentTimeMillis();
+           System.out.println("Time taken with StringBuffer: " + (endTime - startTime) + "ms");
+
+           System.out.println();
+       }
+   }
+}
+
+
+package com.performancetest.stringconcatenationperformance;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StringConcatenationPerformanceTest {
+
+   @Test
+   void testStringConcatenation() {
+       int N = 1000;
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       assertEquals(N, str.length());
+   }
+
+   @Test
+   void testStringBuilderConcatenation() {
+       int N = 1000;
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       assertEquals(N, sb.length());
+   }
+
+   @Test
+   void testStringBufferConcatenation() {
+       int N = 1000;
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       assertEquals(N, sbf.length());
+   }
+
+   @Test
+   void testPerformanceStringBuilderVsString() {
+       int N = 10000;
+
+       // Measure time for String concatenation
+       long startTime = System.nanoTime();
+       String str = "";
+       for (int i = 0; i < N; i++) {
+           str += "a"; // Inefficient
+       }
+       long stringTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuilder
+       startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // StringBuilder should be significantly faster
+       assertTrue(builderTime < stringTime);
+   }
+
+   @Test
+   void testPerformanceStringBufferVsStringBuilder() {
+       int N = 10000;
+
+       // Measure time for StringBuilder
+       long startTime = System.nanoTime();
+       StringBuilder sb = new StringBuilder();
+       for (int i = 0; i < N; i++) {
+           sb.append("a");
+       }
+       long builderTime = System.nanoTime() - startTime;
+
+       // Measure time for StringBuffer
+       startTime = System.nanoTime();
+       StringBuffer sbf = new StringBuffer();
+       for (int i = 0; i < N; i++) {
+           sbf.append("a");
+       }
+       long bufferTime = System.nanoTime() - startTime;
+
+       // StringBuffer should be slightly slower than StringBuilder (due to synchronization)
+       assertTrue(builderTime <= bufferTime);
+   }
+}
+
+
+
+
+
+4. Problem Statement: Large File Reading Efficiency
+Objective:
+Compare FileReader (Character Stream) and InputStreamReader (Byte Stream) when reading a large file (500MB).
+Approach:
+FileReader: Reads character by character (slower for binary files).
+InputStreamReader: Reads bytes and converts to characters (more efficient).
+Comparative Analysis:
+File Size
+FileReader Time
+InputStreamReader Time
+1MB
+50ms
+30ms
+100MB
+3s
+1.5s
+500MB
+10s
+5s
+
+Expected Result:
+InputStreamReader is more efficient for large files.
+FileReader is preferable for text-based data.
+
+5. Problem Statement: Recursive vs Iterative Fibonacci Computation
+Objective:
+Compare Recursive (O(2ⁿ)) vs Iterative (O(N)) Fibonacci solutions.
+Approach:
+Recursive:
+public static int fibonacciRecursive(int n) {
+    if (n <= 1) return n;
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+Iterative:
+public static int fibonacciIterative(int n) {
+    int a = 0, b = 1, sum;
+    for (int i = 2; i <= n; i++) {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+    return b;
+}
+Comparative Analysis:
+Fibonacci (N)
+Recursive (O(2ⁿ))
+Iterative (O(N))
+10
+1ms
+0.01ms
+30
+5s
+0.05ms
+50
+Unfeasible (>1hr)
+0.1ms
+
+Expected Result:
+Recursive approach is infeasible for large values of N due to exponential growth.
+The iterative approach is significantly faster and memory-efficient.
+package com.performance.fibonaccicomputation;
+
+public class FibonacciComputation{
+
+   // Recursive Fibonacci (Exponential Time Complexity: O(2^N))
+   public static int fibonacciRecursive(int n) {
+       if (n <= 1) return n;
+       return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+   }
+
+   // Iterative Fibonacci (Linear Time Complexity: O(N))
+   public static int fibonacciIterative(int n) {
+       if (n <= 1)
+           return n;
+       int a = 0, b = 1, sum;
+       for (int i = 2; i <= n; i++) {
+           sum = a + b;
+           a = b;
+           b = sum;
+       }
+       return b;
+   }
+
+   public static void runPerformanceTest(int N) {
+       System.out.println("Fibonacci Computation for N = " + N);
+
+       // Measure Recursive Execution Time
+       long startTime = System.nanoTime();
+       int recursiveResult = fibonacciRecursive(N);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci Result: " + recursiveResult);
+       System.out.println("Time taken (Recursive): " + recursiveTime + " ms");
+
+       // Measure Iterative Execution Time
+       startTime = System.nanoTime();
+       int iterativeResult = fibonacciIterative(N);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci Result: " + iterativeResult);
+       System.out.println("Time taken (Iterative): " + iterativeTime + " ms");
+
+       System.out.println();
+   }
+
+   public static void main(String[] args) {
+       int[] testCases = {10, 30, 50};
+
+       for (int N : testCases) {
+           if (N <= 30) { // Avoid recursive inefficiency for large values
+               runPerformanceTest(N);
+           } else {
+               System.out.println("Skipping Recursive Fibonacci for N = " + N + " (Too Slow)");
+               System.out.println("Fibonacci Iterative Result: " + fibonacciIterative(N));
+               System.out.println();
+           }
+       }
+   }
+}
+
+
+package com.performancetest.fibonaccicomputationtest;
+
+
+
+import com.performance.fibonaccicomputation.FibonacciComputation;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class FibonacciComputationTest {
+
+   @Test
+   void testFibonacciRecursive() {
+       assertEquals(0, FibonacciComputation.fibonacciRecursive(0));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(1));
+       assertEquals(1, FibonacciComputation.fibonacciRecursive(2));
+       assertEquals(2, FibonacciComputation.fibonacciRecursive(3));
+       assertEquals(3, FibonacciComputation.fibonacciRecursive(4));
+       assertEquals(5, FibonacciComputation.fibonacciRecursive(5));
+       assertEquals(55, FibonacciComputation.fibonacciRecursive(10));
+       assertEquals(832040, FibonacciComputation.fibonacciRecursive(30));
+   }
+
+   @Test
+   void testFibonacciIterative() {
+       assertEquals(0, FibonacciComputation.fibonacciIterative(0));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(1));
+       assertEquals(1, FibonacciComputation.fibonacciIterative(2));
+       assertEquals(2, FibonacciComputation.fibonacciIterative(3));
+       assertEquals(3, FibonacciComputation.fibonacciIterative(4));
+       assertEquals(5, FibonacciComputation.fibonacciIterative(5));
+       assertEquals(55, FibonacciComputation.fibonacciIterative(10));
+       assertEquals(832040, FibonacciComputation.fibonacciIterative(30));
+   }
+
+   @Test
+   void testPerformance() {
+       int n = 30; // Reasonable limit for recursive
+       long startTime = System.nanoTime();
+       FibonacciComputation.fibonacciRecursive(n);
+       long endTime = System.nanoTime();
+       double recursiveTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Recursive Fibonacci for N = " + n + " took: " + recursiveTime + " ms");
+
+       n = 50; // Reasonable limit for iterative
+       startTime = System.nanoTime();
+       FibonacciComputation.fibonacciIterative(n);
+       endTime = System.nanoTime();
+       double iterativeTime = (endTime - startTime) / 1e6; // Convert to milliseconds
+       System.out.println("Iterative Fibonacci for N = " + n + " took: " + iterativeTime + " ms");
+   }
+}
+
+
+
+6. Problem Statement: Comparing Different Data Structures for Searching
+Objective:
+Compare Array (O(N)), HashSet (O(1)), and TreeSet (O(log N)) for searching elements.
+Approach:
+Array: Linear search (O(N)).
+HashSet: Uses hashing (O(1) on average).
+TreeSet: Balanced BST (O(log N)).
+Comparative Analysis:
+Dataset Size (N)
+Array Search (O(N))
+HashSet Search (O(1))
+TreeSet Search (O(log N))
+1,000
+1ms
+0.01ms
+0.1ms
+100,000
+100ms
+0.01ms
+10ms
+1,000,000
+1s
+0.01ms
+20ms
+
+Expected Result:
+HashSet is fastest for lookups but requires extra memory.
+TreeSet maintains order but is slightly slower than HashSet.
+package com.performance.dataStructuresearchcomparison;
+
+import java.util.*;
+
+public class DataStructureSearchComparison {
+   public static void main(String[] args) {
+       int[] sizes = {1_000, 100_000, 1_000_000};
+
+       for (int size : sizes) {
+           System.out.println("Dataset Size: " + size);
+
+           // Generate random data
+           Random rand = new Random();
+           int[] array = new int[size];
+           HashSet<Integer> hashSet = new HashSet<>();
+           TreeSet<Integer> treeSet = new TreeSet<>();
+
+           for (int i = 0; i < size; i++) {
+               int num = rand.nextInt(size * 10);
+               array[i] = num;
+               hashSet.add(num);
+               treeSet.add(num);
+           }
+
+           // Pick a random element to search
+           int searchElement = array[rand.nextInt(size)];
+
+           // Measure time for Array search (O(N))
+           long start = System.nanoTime();
+           boolean foundArray = linearSearch(array, searchElement);
+           long arrayTime = System.nanoTime() - start;
+
+           // Measure time for HashSet search (O(1))
+           start = System.nanoTime();
+           boolean foundHashSet = hashSet.contains(searchElement);
+           long hashSetTime = System.nanoTime() - start;
+
+           // Measure time for TreeSet search (O(log N))
+           start = System.nanoTime();
+           boolean foundTreeSet = treeSet.contains(searchElement);
+           long treeSetTime = System.nanoTime() - start;
+
+           // Print results
+           System.out.printf("Array Search (O(N)): %d ns, Found: %b\n", arrayTime, foundArray);
+           System.out.printf("HashSet Search (O(1)): %d ns, Found: %b\n", hashSetTime, foundHashSet);
+           System.out.printf("TreeSet Search (O(log N)): %d ns, Found: %b\n", treeSetTime, foundTreeSet);
+           System.out.println();
+       }
+   }
+
+   // Linear search for Array
+   private static boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
+
+
+
+package com.performancetest.datastructuresearchcomparisontest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.*;
+
+public class DataStructureSearchComparisonTest {
+   private int[] array;
+   private HashSet<Integer> hashSet;
+   private TreeSet<Integer> treeSet;
+   private int searchElement;
+
+   @BeforeEach
+   void setUp() {
+       int size = 10000; // Test with 10,000 elements
+       Random rand = new Random();
+       array = new int[size];
+       hashSet = new HashSet<>();
+       treeSet = new TreeSet<>();
+
+       // Populate data structures
+       for (int i = 0; i < size; i++) {
+           int num = rand.nextInt(size * 10);
+           array[i] = num;
+           hashSet.add(num);
+           treeSet.add(num);
+       }
+
+       // Pick a random element from the array for testing
+       searchElement = array[rand.nextInt(size)];
+   }
+
+   @Test
+   void testLinearSearch() {
+       assertTrue(linearSearch(array, searchElement), "Element should be found in Array");
+       assertFalse(linearSearch(array, -1), "Non-existent element should not be found in Array");
+   }
+
+   @Test
+   void testHashSetSearch() {
+       assertTrue(hashSet.contains(searchElement), "Element should be found in HashSet");
+       assertFalse(hashSet.contains(-1), "Non-existent element should not be found in HashSet");
+   }
+
+   @Test
+   void testTreeSetSearch() {
+       assertTrue(treeSet.contains(searchElement), "Element should be found in TreeSet");
+       assertFalse(treeSet.contains(-1), "Non-existent element should not be found in TreeSet");
+   }
+
+   // Linear search for Array
+   private boolean linearSearch(int[] arr, int key) {
+       for (int num : arr) {
+           if (num == key) return true;
+       }
+       return false;
+   }
+}
+
